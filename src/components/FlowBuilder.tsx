@@ -31,16 +31,14 @@ type HierarchyNodeData = {
   color?: string;
 };
 
-type HierarchyNode = Node<HierarchyNodeData>;
-
 // Define the nodeTypes object with proper typing
 const nodeTypes: NodeTypes = {
-  hierarchyNode: HierarchyNode as any, // Using 'as any' to bypass strict typing
+  hierarchyNode: HierarchyNode,
 };
 
 export const FlowBuilder = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState<HierarchyNodeData>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [entityName, setEntityName] = useState("");
@@ -160,7 +158,7 @@ export const FlowBuilder = () => {
         y: event.clientY,
       });
 
-      const newNode = {
+      const newNode: Node<HierarchyNodeData> = {
         id: `node-${Date.now()}`,
         type: "hierarchyNode",
         position,
@@ -261,7 +259,7 @@ export const FlowBuilder = () => {
                   className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                   onClick={() => {
                     if (entityName.trim() && reactFlowInstance) {
-                      const newNode = {
+                      const newNode: Node<HierarchyNodeData> = {
                         id: `node-${Date.now()}`,
                         type: "hierarchyNode",
                         position: {

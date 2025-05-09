@@ -11,6 +11,7 @@ interface HierarchyNodeData {
   color?: string;
 }
 
+// Use NodeProps with the correct generic parameter
 const HierarchyNode = memo(({ id, data, selected }: NodeProps<HierarchyNodeData>) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label);
