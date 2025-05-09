@@ -37,27 +37,6 @@ export const FlowBuilder = () => {
   
   // Handle new connections between nodes
   const onConnect = useCallback((params: Connection) => {
-    // Check if the connection would create a cycle
-    const sourceNode = nodes.find(node => node.id === params.source);
-    const targetNode = nodes.find(node => node.id === params.target);
-    
-    if (!sourceNode || !targetNode) return;
-    
-    // Check if this would create a parallel connection (same level nodes)
-    const isParallel = sourceNode.data.level === targetNode.data.level;
-    
-    // Only allow parallel connections or connections to one level down
-    if (sourceNode.data.level > targetNode.data.level) {
-      toast.error("Cannot connect from lower to higher level");
-      return;
-    }
-    
-    // If not parallel, ensure it's only one level difference
-    if (!isParallel && sourceNode.data.level !== targetNode.data.level - 1) {
-      toast.error("Can only connect to adjacent level");
-      return;
-    }
-
     // Create the edge
     setEdges((eds) => 
       addEdge({
@@ -71,61 +50,80 @@ export const FlowBuilder = () => {
       }, eds)
     );
     
-    // Recalculate levels if needed
-    if (!isParallel) {
+    // Recalculate levels after adding a new connection
+    setTimeout(() => {
       recalculateLevels();
-    }
-  }, [nodes, setEdges]);
+    }, 0);
+  }, [setEdges]);
   
   // Function to recalculate all node levels based on connections
   const recalculateLevels = useCallback(() => {
-    // First, find all root nodes (no incoming edges)
+    // Find all root nodes (no incoming edges)
     const nodesWithIncomingEdges = new Set(edges.map(edge => edge.target));
     const rootNodeIds = nodes
       .filter(node => !nodesWithIncomingEdges.has(node.id))
       .map(node => node.id);
     
-    // Assign level 0 to root nodes
+    // Initialize levels object
     const nodeLevels: Record<string, number> = {};
     rootNodeIds.forEach(id => {
       nodeLevels[id] = 0;
     });
     
-    // Function to get all outgoing edges from a node
-    const getOutgoingEdges = (nodeId: string) => 
-      edges.filter(edge => edge.source === nodeId);
+    // Create a map of parent-child relationships
+    const childToParents: Record<string, string[]> = {};
+    edges.forEach(edge => {
+      if (!childToParents[edge.target]) {
+        childToParents[edge.target] = [];
+      }
+      childToParents[edge.target].push(edge.source);
+    });
     
-    // Process nodes in topological order (BFS)
-    const queue = [...rootNodeIds];
-    while (queue.length > 0) {
-      const currentId = queue.shift()!;
-      const currentLevel = nodeLevels[currentId];
+    // Function to process a node and determine its level
+    const processNode = (nodeId: string, visited: Set<string> = new Set()): number => {
+      // If we've already processed this node, return its level
+      if (nodeLevels[nodeId] !== undefined) {
+        return nodeLevels[nodeId];
+      }
       
-      // Process all children
-      getOutgoingEdges(currentId).forEach(edge => {
-        const targetId = edge.target;
-        // Set target level to be one more than source, if it's not already higher
-        if (!nodeLevels[targetId] || nodeLevels[targetId] <= currentLevel) {
-          nodeLevels[targetId] = currentLevel + 1;
-        }
-        queue.push(targetId);
-      });
-    }
+      // If we're in a cycle, set level as max level of parents + 1
+      if (visited.has(nodeId)) {
+        const parentLevels = (childToParents[nodeId] || [])
+          .map(parentId => nodeLevels[parentId] || 0);
+        const maxParentLevel = Math.max(...parentLevels, -1);
+        return maxParentLevel + 1;
+      }
+      
+      // Mark node as visited
+      visited.add(nodeId);
+      
+      // Get parent levels
+      const parents = childToParents[nodeId] || [];
+      const parentLevels = parents.map(parentId => processNode(parentId, new Set(visited)));
+      
+      // Node level is max of parent levels + 1
+      const maxParentLevel = parentLevels.length > 0 ? Math.max(...parentLevels) : -1;
+      const nodeLevel = maxParentLevel + 1;
+      
+      // Save the level
+      nodeLevels[nodeId] = nodeLevel;
+      return nodeLevel;
+    };
+    
+    // Process all nodes
+    nodes.forEach(node => {
+      processNode(node.id);
+    });
     
     // Update node levels
     setNodes(nds => 
-      nds.map(node => {
-        if (nodeLevels[node.id] !== undefined && node.data.level !== nodeLevels[node.id]) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              level: nodeLevels[node.id]
-            }
-          };
+      nds.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          level: nodeLevels[node.id] || 0
         }
-        return node;
-      })
+      }))
     );
   }, [nodes, edges, setNodes]);
   
@@ -143,8 +141,7 @@ export const FlowBuilder = () => {
         return;
       }
 
-      // When dropping a new entity, we'll just set it to level 0 initially
-      // The level will be recalculated based on connections
+      // When dropping a new entity, always set level to 0 initially
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
@@ -162,8 +159,15 @@ export const FlowBuilder = () => {
 
       setNodes((nds) => [...nds, newNode]);
       setEntityName("");  // Clear input field after creating node
+      
+      // After adding a node, recalculate levels if there are edges
+      if (edges.length > 0) {
+        setTimeout(() => {
+          recalculateLevels();
+        }, 0);
+      }
     },
-    [reactFlowInstance, setNodes, entityName]
+    [reactFlowInstance, setNodes, entityName, edges, recalculateLevels]
   );
   
   // Function to save the current flow
@@ -188,6 +192,11 @@ export const FlowBuilder = () => {
         setNodes(savedNodes);
         setEdges(savedEdges);
         toast.success("Flow loaded successfully");
+        
+        // Recalculate levels after loading
+        setTimeout(() => {
+          recalculateLevels();
+        }, 0);
       } catch (error) {
         toast.error("Failed to load saved flow");
       }
@@ -215,15 +224,23 @@ export const FlowBuilder = () => {
     document.body.removeChild(link);
   };
 
+  // Recalculate levels whenever edges change
+  useEffect(() => {
+    if (edges.length > 0 && nodes.length > 0) {
+      recalculateLevels();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="flex h-full w-full">
       <Sidebar />
       
       <div className="flex-1 h-full" ref={reactFlowWrapper}>
         <ReactFlow
-          nodes={nodes}
+          nodes={nodes as any}
           edges={edges}
-          onNodesChange={onNodesChange}
+          onNodesChange={onNodesChange as any}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onInit={setReactFlowInstance}
@@ -260,11 +277,18 @@ export const FlowBuilder = () => {
                         },
                         data: { 
                           label: entityName,
-                          level: 0,
+                          level: 0, // Default level - will be recalculated
                         },
                       };
-                      setNodes((nds) => [...nds, newNode]);
+                      setNodes((nds) => [...nds, newNode] as any);
                       setEntityName("");
+                      
+                      // Recalculate levels if there are edges
+                      if (edges.length > 0) {
+                        setTimeout(() => {
+                          recalculateLevels();
+                        }, 0);
+                      }
                     }
                   }}
                 >

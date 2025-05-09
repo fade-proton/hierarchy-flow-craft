@@ -4,11 +4,12 @@ import { Handle, Position, NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 import { HIERARCHY_LEVELS } from "@/lib/constants";
 
-// Define the correct type for our node data
+// Define the correct type for our node data with index signature to satisfy TypeScript
 export interface HierarchyNodeData {
   label: string;
   level: number;
   color?: string;
+  [key: string]: unknown; // Add index signature to satisfy Record<string, unknown>
 }
 
 // Use NodeProps with the correct generic parameter
@@ -76,13 +77,13 @@ const HierarchyNode = memo(({ id, data, selected }: NodeProps<HierarchyNodeData>
         type="target"
         position={Position.Top}
         className="w-2 h-2 bg-blue-500 border-2 border-white rounded-full"
-        isConnectable={data.level > 0} // Only levels > 0 can be targets
+        isConnectable={true} // All nodes can be targets now
       />
       <Handle
         type="source"
         position={Position.Bottom}
         className="w-2 h-2 bg-blue-500 border-2 border-white rounded-full"
-        isConnectable={data.level < 6} // Only levels < 6 can be sources
+        isConnectable={true} // All nodes can be sources now
       />
     </div>
   );

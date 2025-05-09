@@ -90,7 +90,8 @@ export const Sidebar = () => {
           <li>• Enter an entity name and drag to canvas</li>
           <li>• Connect nodes by dragging between handles</li>
           <li>• Double-click on node text to edit</li>
-          <li>• Levels are automatically assigned</li>
+          <li>• Levels are automatically assigned based on connections</li>
+          <li>• Root nodes start at level 0</li>
           <li>• Delete nodes with Backspace/Delete key</li>
           <li>• Save your hierarchy for later</li>
         </ul>
