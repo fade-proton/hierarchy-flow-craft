@@ -1,8 +1,10 @@
 
 import { memo, useState } from "react";
-import { Handle, Position, NodeProps, NodeToolbar } from "@xyflow/react";
+import { Handle, Position, NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
+import { HIERARCHY_LEVELS } from "@/lib/constants";
 
+// Define the correct type for our node data
 type HierarchyNodeData = {
   label: string;
   level: number;
@@ -40,11 +42,9 @@ const HierarchyNode = memo(({ id, data, selected }: NodeProps<HierarchyNodeData>
       )}
       style={{ borderLeftColor: getHierarchyColor(data.level), borderLeftWidth: '4px' }}
     >
-      <NodeToolbar>
-        <div className="bg-white p-1 rounded shadow text-xs">
-          Level {data.level}
-        </div>
-      </NodeToolbar>
+      <div className="bg-white p-1 rounded shadow text-xs absolute -top-6 left-1/2 transform -translate-x-1/2">
+        Level {data.level}
+      </div>
       
       {isEditing ? (
         <input

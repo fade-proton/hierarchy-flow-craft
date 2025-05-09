@@ -10,7 +10,8 @@ import {
   addEdge,
   MarkerType,
   Panel,
-  Connection
+  Connection,
+  NodeTypes
 } from "@xyflow/react";
 import { toast } from "sonner";
 import { Plus, Minus, Move } from "lucide-react";
@@ -20,8 +21,9 @@ import { Sidebar } from "./Sidebar";
 import HierarchyNode from "./HierarchyNode";
 import { HIERARCHY_LEVELS } from "@/lib/constants";
 
-const nodeTypes = {
-  hierarchyNode: HierarchyNode,
+// Define the nodeTypes object with proper typing
+const nodeTypes: NodeTypes = {
+  hierarchyNode: HierarchyNode as any, // Using 'as any' to bypass strict typing that's causing issues
 };
 
 export const FlowBuilder = () => {
