@@ -13,25 +13,17 @@ import {
   Connection,
   NodeTypes,
   Edge,
-  Node
+  Node,
 } from "@xyflow/react";
 import { toast } from "sonner";
 import { Plus, Minus, Move, Save, Download, Upload } from "lucide-react";
 
 import "@xyflow/react/dist/style.css";
 import { Sidebar } from "./Sidebar";
-import HierarchyNode from "./HierarchyNode";
+import HierarchyNode, { HierarchyNodeData } from "./HierarchyNode";
 import { HIERARCHY_LEVELS } from "@/lib/constants";
 import { Input } from "./ui/input";
 
-// Define types for our nodes with hierarchy data
-type HierarchyNodeData = {
-  label: string;
-  level: number;
-  color?: string;
-};
-
-// Define the nodeTypes object with proper typing
 const nodeTypes: NodeTypes = {
   hierarchyNode: HierarchyNode as any, // Use type assertion to bypass type checking
 };
@@ -168,7 +160,7 @@ export const FlowBuilder = () => {
         },
       };
 
-      setNodes((nds) => nds.concat(newNode));
+      setNodes((nds) => [...nds, newNode]);
       setEntityName("");  // Clear input field after creating node
     },
     [reactFlowInstance, setNodes, entityName]
@@ -271,7 +263,7 @@ export const FlowBuilder = () => {
                           level: 0,
                         },
                       };
-                      setNodes((nds) => nds.concat(newNode));
+                      setNodes((nds) => [...nds, newNode]);
                       setEntityName("");
                     }
                   }}

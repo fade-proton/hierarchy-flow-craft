@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { HIERARCHY_LEVELS } from "@/lib/constants";
 
 // Define the correct type for our node data
-interface HierarchyNodeData {
+export interface HierarchyNodeData {
   label: string;
   level: number;
   color?: string;

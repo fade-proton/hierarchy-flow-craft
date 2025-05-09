@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -98,4 +99,58 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Flow Builder Specific Styles */
+.react-flow__node {
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.react-flow__node.selected {
+  box-shadow: 0 0 0 2px #4299e1, 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.react-flow__handle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #4299e1;
+  border: 2px solid #ffffff;
+}
+
+.react-flow__edge-path {
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #4299e1;
+  stroke-width: 3;
+}
+
+.react-flow__controls {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background-color: #ffffff;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #f5f5f5;
+}
+
+.react-flow__minimap {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
