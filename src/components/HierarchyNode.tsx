@@ -5,10 +5,11 @@ import { cn } from "@/lib/utils";
 import { HIERARCHY_LEVELS } from "@/lib/constants";
 
 // Define the correct type for our node data
-type HierarchyNodeData = {
+interface HierarchyNodeData {
   label: string;
   level: number;
-};
+  color?: string;
+}
 
 const HierarchyNode = memo(({ id, data, selected }: NodeProps<HierarchyNodeData>) => {
   const [isEditing, setIsEditing] = useState(false);
