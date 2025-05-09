@@ -21,7 +21,6 @@ import { Plus, Minus, Move, Save, Download, Upload } from "lucide-react";
 import "@xyflow/react/dist/style.css";
 import { Sidebar } from "./Sidebar";
 import HierarchyNode, { HierarchyNodeData } from "./HierarchyNode";
-import { HIERARCHY_LEVELS } from "@/lib/constants";
 import { Input } from "./ui/input";
 
 const nodeTypes: NodeTypes = {
@@ -42,10 +41,10 @@ export const FlowBuilder = () => {
       addEdge({
         ...params,
         animated: true,
-        style: { stroke: "#3b82f6", strokeWidth: 2 },
+        style: { stroke: "#0FA0CE", strokeWidth: 2 },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: "#3b82f6",
+          color: "#0FA0CE",
         },
       }, eds)
     );
@@ -250,22 +249,33 @@ export const FlowBuilder = () => {
           fitView
           attributionPosition="bottom-right"
           deleteKeyCode={["Backspace", "Delete"]}
+          className="bg-[#121520]" // Dark background for the canvas
         >
-          <Background color="#aaaaaa" gap={16} />
-          <Controls />
-          <MiniMap nodeStrokeWidth={3} zoomable pannable />
-          <Panel position="top-left" className="bg-white p-4 rounded-md shadow-md">
+          <Background 
+            color="#333" 
+            gap={24} 
+            size={2}
+            variant="grid"  // Grid background
+          />
+          <Controls className="bg-[#1A1F2C] border border-gray-700 text-white rounded-md overflow-hidden" />
+          <MiniMap 
+            nodeStrokeWidth={3} 
+            zoomable 
+            pannable
+            className="bg-[#1A1F2C] border border-gray-700"
+          />
+          <Panel position="top-left" className="bg-[#1A1F2C] border border-gray-700 p-4 rounded-md shadow-md">
             <div className="flex flex-col space-y-3">
-              <h3 className="text-sm font-bold">Add New Entity</h3>
+              <h3 className="text-sm font-bold text-white">Add New Entity</h3>
               <div className="flex items-center space-x-2">
                 <Input 
                   value={entityName}
                   onChange={(e) => setEntityName(e.target.value)}
                   placeholder="Entity Name"
-                  className="text-sm"
+                  className="text-sm bg-[#242938] text-white border-gray-700"
                 />
                 <button
-                  className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                  className="p-2 bg-[#0FA0CE] text-white rounded hover:bg-[#0b8cba] transition-colors"
                   onClick={() => {
                     if (entityName.trim() && reactFlowInstance) {
                       const newNode: Node<HierarchyNodeData> = {
@@ -298,21 +308,21 @@ export const FlowBuilder = () => {
               <div className="flex space-x-2">
                 <button 
                   onClick={saveFlow}
-                  className="flex items-center space-x-1 px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600"
+                  className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
                 >
                   <Save size={12} />
                   <span>Save</span>
                 </button>
                 <button 
                   onClick={loadFlow}
-                  className="flex items-center space-x-1 px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                  className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
                 >
                   <Download size={12} />
                   <span>Load</span>
                 </button>
                 <button 
                   onClick={exportFlow}
-                  className="flex items-center space-x-1 px-3 py-1 bg-purple-500 text-white text-xs rounded hover:bg-purple-600"
+                  className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
                 >
                   <Upload size={12} />
                   <span>Export</span>

@@ -1,8 +1,7 @@
 
 import { DragEvent, useState } from "react";
-import { HIERARCHY_LEVELS } from "@/lib/constants";
 import { Input } from "./ui/input";
-import { Plus, HelpCircle, LayoutDashboard, BookOpen } from "lucide-react";
+import { Plus, HelpCircle, LayoutDashboard } from "lucide-react";
 
 export const Sidebar = () => {
   const [newEntityName, setNewEntityName] = useState("");
@@ -43,7 +42,7 @@ export const Sidebar = () => {
         </div>
         
         <div 
-          className="mt-3 p-3 border border-blue-500 rounded-md bg-[#2A304A] cursor-move flex items-center justify-between"
+          className="mt-3 p-3 border border-[#0FA0CE] rounded-md bg-[#2A304A] cursor-move flex items-center justify-between"
           draggable={newEntityName.trim().length > 0}
           onDragStart={(event) => 
             onDragStart(event, "hierarchyNode", newEntityName)
@@ -56,32 +55,11 @@ export const Sidebar = () => {
             <div className="text-sm font-medium">{newEntityName || "Unnamed Entity"}</div>
             <div className="text-xs text-gray-400">Drag to canvas</div>
           </div>
-          <Plus size={16} className="text-blue-400" />
+          <Plus size={16} className="text-[#0FA0CE]" />
         </div>
       </div>
       
       <div className="mt-6">
-        <h3 className="text-sm font-medium mb-2 flex items-center">
-          <BookOpen size={14} className="mr-1" />
-          Hierarchy Levels
-        </h3>
-        <div className="space-y-1">
-          {Object.entries(HIERARCHY_LEVELS).map(([level, label]) => (
-            <div
-              key={level}
-              className="p-2 border border-l-4 rounded-md text-xs bg-[#242938] border-gray-700"
-              style={{
-                borderLeftColor: getHierarchyColor(parseInt(level)),
-              }}
-            >
-              <div className="font-medium">{label}</div>
-              <div className="text-gray-400">Level {level}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="mt-8">
         <h3 className="text-sm font-medium mb-2 flex items-center">
           <HelpCircle size={14} className="mr-1" />
           Instructions
@@ -90,6 +68,7 @@ export const Sidebar = () => {
           <li>• Enter an entity name and drag to canvas</li>
           <li>• Connect nodes by dragging between handles</li>
           <li>• Double-click on node text to edit</li>
+          <li>• Click on settings icon for more options</li>
           <li>• Levels are automatically assigned based on connections</li>
           <li>• Root nodes start at level 0</li>
           <li>• Delete nodes with Backspace/Delete key</li>
@@ -99,18 +78,3 @@ export const Sidebar = () => {
     </aside>
   );
 };
-
-// Helper function to get hierarchy color based on level
-function getHierarchyColor(level: number): string {
-  const colors: Record<number, string> = {
-    0: "#4B69FF", // National - Blue
-    1: "#5D5AFF", // Regional - Blue-Purple
-    2: "#7152FF", // Province - Purple
-    3: "#8B42FF", // Zone - Purple-Violet
-    4: "#A32EFF", // Area - Violet
-    5: "#C71AFD", // Parish - Pink-Purple
-    6: "#E816FA", // Additional level - Pink
-  };
-
-  return colors[level] || colors[0];
-}
