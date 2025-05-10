@@ -1,3 +1,4 @@
+
 import { memo, useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
@@ -15,11 +16,10 @@ export interface HierarchyNodeData {
   label: string;
   level?: number;
   color?: string;
-  [key: string]: unknown;
 }
 
 // Fix the typing to match what ReactFlow expects
-const HierarchyNode = memo(({ id, data, selected }: NodeProps) => {
+const HierarchyNode = memo(({ id, data, selected }: NodeProps<HierarchyNodeData>) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data?.label || "Entity");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -41,7 +41,7 @@ const HierarchyNode = memo(({ id, data, selected }: NodeProps) => {
 
   // Get border color based on hierarchy level - we'll keep this for visual differentiation
   const getBorderColor = () => {
-    const level = data?.level || 0;
+    const level = data?.level !== undefined ? data.level : 0;
     return getHierarchyColor(level);
   };
   
@@ -101,7 +101,7 @@ const HierarchyNode = memo(({ id, data, selected }: NodeProps) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Level: {data?.level || 0}</label>
+                    <label className="block text-sm font-medium mb-1">Level: {data?.level !== undefined ? data.level : 0}</label>
                     <div className="text-sm text-gray-400">
                       (Automatically calculated based on connections)
                     </div>

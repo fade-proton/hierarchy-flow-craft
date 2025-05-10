@@ -14,6 +14,7 @@ import {
   NodeTypes,
   Edge,
   Node,
+  BackgroundVariant,
 } from "@xyflow/react";
 import { toast } from "sonner";
 import { Plus, Minus, Move, Save, Download, Upload } from "lucide-react";
@@ -255,7 +256,7 @@ export const FlowBuilder = () => {
             color="#333" 
             gap={24} 
             size={2}
-            variant="grid"  // Grid background
+            variant={BackgroundVariant.DOTS}  // Using the correct enum value
           />
           <Controls className="bg-[#1A1F2C] border border-gray-700 text-white rounded-md overflow-hidden" />
           <MiniMap 
