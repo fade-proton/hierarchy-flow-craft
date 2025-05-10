@@ -1,3 +1,4 @@
+
 import { memo, useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
@@ -15,7 +16,6 @@ export interface HierarchyNodeData {
   label: string;
   level?: number;
   color?: string;
-  [key: string]: unknown; // This index signature satisfies Record<string, unknown>
 }
 
 // Fix the typing to match what ReactFlow expects
