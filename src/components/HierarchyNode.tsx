@@ -16,6 +16,7 @@ export interface HierarchyNodeData {
   label: string;
   level?: number;
   color?: string;
+  [key: string]: any; // Add index signature for additional properties
 }
 
 // Fix the typing to match what ReactFlow expects

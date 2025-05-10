@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useEffect } from "react";
 import {
   ReactFlow,
@@ -24,11 +23,13 @@ import { Sidebar } from "./Sidebar";
 import HierarchyNode, { HierarchyNodeData } from "./HierarchyNode";
 import { Input } from "./ui/input";
 
+// Define the nodeTypes correctly with proper type casting
 const nodeTypes: NodeTypes = {
-  hierarchyNode: HierarchyNode as any, // Use type assertion to bypass type checking
+  hierarchyNode: HierarchyNode as any, // Use type assertion as a workaround
 };
 
 export const FlowBuilder = () => {
+  // ... keep existing code (state declarations and other code)
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
