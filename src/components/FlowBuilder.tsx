@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useEffect } from "react";
 import {
   ReactFlow,
@@ -27,7 +26,7 @@ import { Input } from "./ui/input";
 // Define nodeTypes outside the component to avoid recreation on each render
 // and use type assertion for proper compatibility
 const nodeTypes: NodeTypes = {
-  hierarchyNode: HierarchyNode as unknown as React.ComponentType<any>,
+  hierarchyNode: HierarchyNode,
 };
 
 export const FlowBuilder = () => {
@@ -259,7 +258,7 @@ export const FlowBuilder = () => {
             color="#333" 
             gap={24} 
             size={2}
-            variant={BackgroundVariant.Dots}  // Fixed: Using correct enum name
+            variant={BackgroundVariant.Dots}
           />
           <Controls className="bg-[#1A1F2C] border border-gray-700 text-white rounded-md overflow-hidden" />
           <MiniMap 
