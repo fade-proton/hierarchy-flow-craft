@@ -2,13 +2,16 @@
 import { Panel } from "@xyflow/react";
 import { ZoomIn, ZoomOut, Maximize2, Map } from "lucide-react";
 import { useFlow } from "@/context/FlowContext";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 
-export const ZoomControls = () => {
+interface ZoomControlsProps {
+  showMinimap: boolean;
+  setShowMinimap: (show: boolean) => void;
+}
+
+export const ZoomControls = ({ showMinimap, setShowMinimap }: ZoomControlsProps) => {
   const { reactFlowInstance } = useFlow();
-  const [showMinimap, setShowMinimap] = useState(true);
 
   const handleZoomIn = () => {
     if (reactFlowInstance) {

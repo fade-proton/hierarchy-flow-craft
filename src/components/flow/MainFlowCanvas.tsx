@@ -9,6 +9,7 @@ import {
 } from "@xyflow/react";
 import { useFlow } from "@/context/FlowContext";
 import HierarchyNode from "@/components/HierarchyNode";
+import DocumentationNode from "@/components/DocumentationNode";
 import { NodeCreationPanel } from "./NodeCreationPanel";
 import { FlowManagementControls } from "./FlowManagementControls";
 import { ZoomControls } from "./ZoomControls";
@@ -17,6 +18,7 @@ import { useState } from "react";
 // Define the nodeTypes correctly with proper type casting
 const nodeTypes = {
   hierarchyNode: HierarchyNode as any, // Use type assertion as a workaround
+  documentationNode: DocumentationNode as any, // Add documentation node type
 };
 
 export const MainFlowCanvas = () => {
@@ -49,6 +51,7 @@ export const MainFlowCanvas = () => {
 
       const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
       const entityName = event.dataTransfer.getData("application/reactflow/entityName") || "New Entity";
+      const nodeType = event.dataTransfer.getData("application/reactflow/type") || "hierarchyNode";
       
       // Get the position where the node is dropped
       const position = {
@@ -56,7 +59,7 @@ export const MainFlowCanvas = () => {
         y: event.clientY - reactFlowBounds.top,
       };
 
-      createNode(entityName, position);
+      createNode(entityName, position, nodeType);
     },
     [createNode, setReactFlowInstance]
   );
@@ -95,7 +98,7 @@ export const MainFlowCanvas = () => {
         )}
         <NodeCreationPanel />
         <FlowManagementControls />
-        <ZoomControls />
+        <ZoomControls showMinimap={showMinimap} setShowMinimap={setShowMinimap} />
       </ReactFlow>
     </div>
   );

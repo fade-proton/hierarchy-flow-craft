@@ -11,9 +11,10 @@ import {
 } from "@xyflow/react";
 import { toast } from "sonner";
 import { HierarchyNodeData } from "@/components/HierarchyNode";
+import { DocumentationNodeData } from "@/components/DocumentationNode";
 
 type FlowContextType = {
-  nodes: Node<HierarchyNodeData>[];
+  nodes: Node[];
   edges: Edge[];
   onNodesChange: any;
   onEdgesChange: any;
@@ -24,7 +25,7 @@ type FlowContextType = {
   saveFlow: () => void;
   loadFlow: () => void;
   exportFlow: () => void;
-  createNode: (label: string, position: { x: number, y: number }) => void;
+  createNode: (label: string, position: { x: number, y: number }, type?: string) => void;
 };
 
 export const FlowContext = createContext<FlowContextType | undefined>(undefined);
@@ -42,7 +43,7 @@ type FlowProviderProps = {
 };
 
 export const FlowProvider = ({ children }: FlowProviderProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
@@ -123,37 +124,55 @@ export const FlowProvider = ({ children }: FlowProviderProps) => {
     
     // Process all nodes
     nodes.forEach(node => {
-      processNode(node.id);
+      if (node.type === 'hierarchyNode') {
+        processNode(node.id);
+      }
     });
     
-    // Update node levels
+    // Update node levels (only for hierarchy nodes)
     setNodes(nds => 
-      nds.map(node => ({
-        ...node,
-        data: {
-          ...node.data,
-          level: nodeLevels[node.id] || 0
+      nds.map(node => {
+        if (node.type === 'hierarchyNode') {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              level: nodeLevels[node.id] || 0
+            }
+          };
         }
-      }))
+        return node;
+      })
     );
   }, [nodes, edges, setNodes]);
 
   // Create a new node with given properties
-  const createNode = useCallback((label: string, position: { x: number, y: number }) => {
-    const newNode: Node<HierarchyNodeData> = {
-      id: `node-${Date.now()}`,
-      type: "hierarchyNode",
-      position,
-      data: { 
+  const createNode = useCallback((label: string, position: { x: number, y: number }, type = "hierarchyNode") => {
+    let newNodeData: HierarchyNodeData | DocumentationNodeData;
+    
+    if (type === "documentationNode") {
+      newNodeData = {
+        content: "Add documentation here...",
+      };
+    } else {
+      // Default to hierarchy node
+      newNodeData = { 
         label: label || "New Entity",
         level: 0,
-      },
+      };
+    }
+    
+    const newNode: Node = {
+      id: `node-${Date.now()}`,
+      type,
+      position,
+      data: newNodeData,
     };
 
     setNodes((nds) => [...nds, newNode]);
     
     // After adding a node, recalculate levels if there are edges
-    if (edges.length > 0) {
+    if (edges.length > 0 && type === "hierarchyNode") {
       setTimeout(() => {
         recalculateLevels();
       }, 0);
