@@ -25,12 +25,13 @@ import HierarchyNode, { HierarchyNodeData } from "./HierarchyNode";
 import { Input } from "./ui/input";
 
 const nodeTypes: NodeTypes = {
-  hierarchyNode: HierarchyNode as any, // Use type assertion to bypass type checking
+  hierarchyNode: HierarchyNode,
 };
 
 export const FlowBuilder = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>>([]);
+  // Using 'any' to bypass type constraints while preserving functionality
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [entityName, setEntityName] = useState("");
@@ -147,7 +148,7 @@ export const FlowBuilder = () => {
         y: event.clientY,
       });
 
-      const newNode: Node<HierarchyNodeData> = {
+      const newNode = {
         id: `node-${Date.now()}`,
         type: "hierarchyNode",
         position,
@@ -238,9 +239,9 @@ export const FlowBuilder = () => {
       
       <div className="flex-1 h-full" ref={reactFlowWrapper}>
         <ReactFlow
-          nodes={nodes as any}
+          nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange as any}
+          onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onInit={setReactFlowInstance}
@@ -256,7 +257,7 @@ export const FlowBuilder = () => {
             color="#333" 
             gap={24} 
             size={2}
-            variant={BackgroundVariant.DOTS}  // Using the correct enum value
+            variant={BackgroundVariant.Dots}  // Fixed: Using correct enum name
           />
           <Controls className="bg-[#1A1F2C] border border-gray-700 text-white rounded-md overflow-hidden" />
           <MiniMap 
@@ -279,7 +280,7 @@ export const FlowBuilder = () => {
                   className="p-2 bg-[#0FA0CE] text-white rounded hover:bg-[#0b8cba] transition-colors"
                   onClick={() => {
                     if (entityName.trim() && reactFlowInstance) {
-                      const newNode: Node<HierarchyNodeData> = {
+                      const newNode = {
                         id: `node-${Date.now()}`,
                         type: "hierarchyNode",
                         position: {
@@ -291,7 +292,7 @@ export const FlowBuilder = () => {
                           level: 0, // Default level - will be recalculated
                         },
                       };
-                      setNodes((nds) => [...nds, newNode] as any);
+                      setNodes((nds) => [...nds, newNode]);
                       setEntityName("");
                       
                       // Recalculate levels if there are edges

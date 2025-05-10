@@ -12,10 +12,12 @@ import {
 import { Settings } from "lucide-react";
 
 // Define the correct type for our node data
+// Adding index signature to satisfy Record<string, unknown>
 export interface HierarchyNodeData {
   label: string;
   level?: number;
   color?: string;
+  [key: string]: unknown; // This index signature satisfies Record<string, unknown>
 }
 
 // Fix the typing to match what ReactFlow expects
