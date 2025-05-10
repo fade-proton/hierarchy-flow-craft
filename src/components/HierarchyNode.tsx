@@ -1,4 +1,3 @@
-
 import { memo, useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
@@ -12,7 +11,6 @@ import {
 import { Settings } from "lucide-react";
 
 // Define the correct type for our node data
-// Adding index signature to satisfy Record<string, unknown>
 export interface HierarchyNodeData {
   label: string;
   level?: number;

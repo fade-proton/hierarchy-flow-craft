@@ -24,13 +24,15 @@ import { Sidebar } from "./Sidebar";
 import HierarchyNode, { HierarchyNodeData } from "./HierarchyNode";
 import { Input } from "./ui/input";
 
+// Define nodeTypes outside the component to avoid recreation on each render
+// and use type assertion for proper compatibility
 const nodeTypes: NodeTypes = {
-  hierarchyNode: HierarchyNode,
+  hierarchyNode: HierarchyNode as unknown as React.ComponentType<any>,
 };
 
 export const FlowBuilder = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  // Using 'any' to bypass type constraints while preserving functionality
+  // Using type assertions to bypass type constraints while preserving functionality
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
