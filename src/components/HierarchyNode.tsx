@@ -1,4 +1,3 @@
-
 import { memo, useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
@@ -20,7 +19,7 @@ export interface HierarchyNodeData {
 }
 
 // Fix the typing to match what ReactFlow expects
-const HierarchyNode = memo(({ id, data, selected }: NodeProps<HierarchyNodeData>) => {
+const HierarchyNode = memo(({ id, data, selected }: NodeProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data?.label || "Entity");
   const [drawerOpen, setDrawerOpen] = useState(false);

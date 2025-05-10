@@ -2,9 +2,11 @@
 import { DragEvent, useState } from "react";
 import { Input } from "./ui/input";
 import { Plus, HelpCircle, LayoutDashboard } from "lucide-react";
+import { useFlow } from "@/context/FlowContext";
 
 export const Sidebar = () => {
   const [newEntityName, setNewEntityName] = useState("");
+  const { reactFlowInstance } = useFlow();
   
   // Handle the drag start event for dragging from sidebar to canvas
   const onDragStart = (
