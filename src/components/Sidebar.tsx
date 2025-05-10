@@ -1,12 +1,10 @@
 
 import { DragEvent, useState } from "react";
 import { Input } from "./ui/input";
-import { Plus, HelpCircle, LayoutDashboard, FileText } from "lucide-react";
-import { useFlow } from "@/context/FlowContext";
+import { Plus, HelpCircle, LayoutDashboard } from "lucide-react";
 
 export const Sidebar = () => {
   const [newEntityName, setNewEntityName] = useState("");
-  const { reactFlowInstance } = useFlow();
   
   // Handle the drag start event for dragging from sidebar to canvas
   const onDragStart = (
@@ -61,27 +59,6 @@ export const Sidebar = () => {
         </div>
       </div>
       
-      {/* Documentation Node */}
-      <div className="mb-4 p-3 border border-gray-700 rounded-md bg-[#242938]">
-        <h3 className="text-sm font-medium mb-2 flex items-center">
-          <FileText size={14} className="mr-1" />
-          Documentation
-        </h3>
-        <div 
-          className="p-3 border border-[#9b87f5] rounded-md bg-[#2A304A] cursor-move flex items-center justify-between"
-          draggable={true}
-          onDragStart={(event) => 
-            onDragStart(event, "documentationNode", "Documentation")
-          }
-        >
-          <div>
-            <div className="text-sm font-medium">Documentation</div>
-            <div className="text-xs text-gray-400">Drag to canvas</div>
-          </div>
-          <FileText size={16} className="text-[#9b87f5]" />
-        </div>
-      </div>
-      
       <div className="mt-6">
         <h3 className="text-sm font-medium mb-2 flex items-center">
           <HelpCircle size={14} className="mr-1" />
@@ -96,7 +73,6 @@ export const Sidebar = () => {
           <li>• Root nodes start at level 0</li>
           <li>• Delete nodes with Backspace/Delete key</li>
           <li>• Save your hierarchy for later</li>
-          <li>• Add documentation nodes for context</li>
         </ul>
       </div>
     </aside>
