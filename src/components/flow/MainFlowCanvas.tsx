@@ -11,6 +11,8 @@ import { useFlow } from "@/context/FlowContext";
 import HierarchyNode from "@/components/HierarchyNode";
 import { NodeCreationPanel } from "./NodeCreationPanel";
 import { FlowManagementControls } from "./FlowManagementControls";
+import { ZoomControls } from "./ZoomControls";
+import { useState } from "react";
 
 // Define the nodeTypes correctly with proper type casting
 const nodeTypes = {
@@ -19,6 +21,8 @@ const nodeTypes = {
 
 export const MainFlowCanvas = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const [showMinimap, setShowMinimap] = useState(true);
+  
   const { 
     nodes, 
     edges, 
@@ -78,17 +82,20 @@ export const MainFlowCanvas = () => {
           color="#333" 
           gap={24} 
           size={2}
-          variant={BackgroundVariant.Dots}  // Using the correct enum value
+          variant={BackgroundVariant.Dots}
         />
         <Controls className="bg-[#1A1F2C] border border-gray-700 text-white rounded-md overflow-hidden" />
-        <MiniMap 
-          nodeStrokeWidth={3} 
-          zoomable 
-          pannable
-          className="bg-[#1A1F2C] border border-gray-700"
-        />
+        {showMinimap && (
+          <MiniMap 
+            nodeStrokeWidth={3} 
+            zoomable 
+            pannable
+            className="bg-[#1A1F2C] border border-gray-700"
+          />
+        )}
         <NodeCreationPanel />
         <FlowManagementControls />
+        <ZoomControls />
       </ReactFlow>
     </div>
   );

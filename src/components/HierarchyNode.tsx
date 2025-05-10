@@ -1,150 +1,131 @@
-import { memo, useState } from "react";
+
+import { useState, useRef, useCallback } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import { cn } from "@/lib/utils";
-import { 
-  Drawer, 
-  DrawerContent, 
-  DrawerHeader, 
-  DrawerTitle,
-  DrawerTrigger
-} from "@/components/ui/drawer";
 import { Settings } from "lucide-react";
 
-// Define the correct type for our node data
+// Define the data structure for the HierarchyNode
 export interface HierarchyNodeData {
   label: string;
-  level?: number;
-  color?: string;
-  [key: string]: any; // Add index signature for additional properties
+  level: number;
+  [key: string]: any; // Add index signature to allow any string key
 }
 
-// Fix the typing to match what ReactFlow expects
-const HierarchyNode = memo(({ id, data, selected }: NodeProps) => {
+// Extend the NodeProps to include our custom data type
+const HierarchyNode = ({ data, isConnectable }: NodeProps<HierarchyNodeData>) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [label, setLabel] = useState(data?.label || "Entity");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  // Handle double click to edit the label
-  const handleDoubleClick = () => {
+  const [label, setLabel] = useState(data?.label || "New Entity");
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Get the colors for the node based on level
+  const getNodeColors = useCallback(() => {
+    // Define colors for each level
+    const colors = [
+      "#0FA0CE", // Level 0 - Blue
+      "#9B87F5", // Level 1 - Purple
+      "#F57DBD", // Level 2 - Pink
+      "#F97316", // Level 3 - Orange
+      "#0EA5E9", // Level 4 - Sky Blue
+      "#8B5CF6", // Level 5 - Violet
+      "#D946EF", // Level 6 - Magenta
+    ];
+    
+    // Ensure we have a valid level number
+    const level = typeof data?.level === 'number' ? data.level : 0;
+    const colorIndex = Math.min(level, colors.length - 1);
+    
+    return {
+      borderColor: colors[colorIndex],
+      shadowColor: `${colors[colorIndex]}70`, // Add transparency for shadow
+    };
+  }, [data?.level]);
+  
+  const { borderColor, shadowColor } = getNodeColors();
+  
+  // Handle double-click to start editing
+  const handleDoubleClick = useCallback(() => {
     setIsEditing(true);
-  };
-
-  const handleBlur = () => {
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 0);
+  }, []);
+  
+  // Handle saving the edited label
+  const handleBlur = useCallback(() => {
     setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+    // Here you would typically update the node data in your state management
+  }, []);
+  
+  // Handle key press events
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === "Enter") {
       setIsEditing(false);
     }
-  };
-
-  // Get border color based on hierarchy level - we'll keep this for visual differentiation
-  const getBorderColor = () => {
-    const level = data?.level !== undefined ? data.level : 0;
-    return getHierarchyColor(level);
-  };
+  }, []);
   
   return (
-    <>
-      <div 
-        className={cn(
-          "px-4 py-4 shadow-md rounded-none border-l-4 w-[150px] h-[150px]", // Square shape
-          "bg-[#1A1F2C] text-white", // Dark background
-          "hover:bg-[#242938] transition-colors", // Hover effect
-          selected ? "border-[#0FA0CE]" : "border-gray-700", // Selection styling
-        )}
-        style={{ borderLeftColor: getBorderColor() }}
-      >
-        <div className="flex flex-col h-full">
+    <div
+      className="p-3 rounded-xl border-2 bg-[#242938] min-w-[180px]"
+      style={{
+        borderColor,
+        boxShadow: `0 0 10px ${shadowColor}`,
+      }}
+    >
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="w-3 h-3 rounded-full border-2 bg-[#242938]"
+        style={{ borderColor }}
+        isConnectable={isConnectable}
+      />
+      
+      <div className="flex flex-col">
+        {/* Level indicator */}
+        <div className="text-xs text-gray-400 mb-1">
+          Level: {typeof data?.level === 'number' ? data.level : 0}
+        </div>
+        
+        {/* Node content */}
+        <div className="flex justify-between items-center">
           {isEditing ? (
             <input
-              type="text"
+              ref={inputRef}
               value={label}
-              onChange={(e) => setLabel(e.target.value)}
+              onChange={e => setLabel(e.target.value)}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              className="w-full bg-[#242938] text-white border-none focus:outline-none rounded-sm"
+              className="bg-[#1A1F2C] text-white border border-gray-600 rounded px-2 py-1 w-full text-sm"
               autoFocus
             />
           ) : (
-            <div
-              className="text-center font-medium text-white flex-grow"
+            <div 
+              className="text-white font-medium cursor-text text-sm flex-grow break-all"
               onDoubleClick={handleDoubleClick}
             >
-              {label}
+              {data?.label || "New Entity"}
             </div>
           )}
           
-          <div className="mt-auto flex justify-end">
-            <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-              <DrawerTrigger asChild>
-                <button 
-                  className="p-1 rounded-sm hover:bg-[#0FA0CE] text-gray-300 hover:text-white transition-colors focus:outline-none" 
-                  onClick={() => setDrawerOpen(true)}
-                >
-                  <Settings size={18} />
-                </button>
-              </DrawerTrigger>
-              <DrawerContent className="bg-[#1A1F2C] text-white border-t-2 border-[#0FA0CE]">
-                <DrawerHeader>
-                  <DrawerTitle>Entity Settings: {label}</DrawerTitle>
-                </DrawerHeader>
-                <div className="p-4">
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">Entity Name</label>
-                    <input
-                      type="text"
-                      value={label}
-                      onChange={(e) => setLabel(e.target.value)}
-                      className="w-full bg-[#242938] text-white border border-gray-700 p-2 rounded-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Level: {data?.level !== undefined ? data.level : 0}</label>
-                    <div className="text-sm text-gray-400">
-                      (Automatically calculated based on connections)
-                    </div>
-                  </div>
-                </div>
-              </DrawerContent>
-            </Drawer>
-          </div>
+          <button className="ml-2 text-gray-400 hover:text-white focus:outline-none">
+            <Settings size={14} />
+          </button>
         </div>
         
-        {/* Handles for connections */}
-        <Handle
-          type="target"
-          position={Position.Top}
-          className="w-2 h-2 bg-[#0FA0CE] border-2 border-white rounded-full"
-          isConnectable={true}
-        />
-        <Handle
-          type="source"
-          position={Position.Bottom}
-          className="w-2 h-2 bg-[#0FA0CE] border-2 border-white rounded-full"
-          isConnectable={true}
-        />
+        {/* Optional description or additional info */}
+        <div className="text-xs text-gray-400 mt-1">
+          ID: {typeof data?.level === 'number' ? `NODE-${data.level}-${Math.floor(Math.random() * 1000)}` : 'Unknown'}
+        </div>
       </div>
-    </>
+      
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="w-3 h-3 rounded-full border-2 bg-[#242938]"
+        style={{ borderColor }}
+        isConnectable={isConnectable}
+      />
+    </div>
   );
-});
-
-HierarchyNode.displayName = "HierarchyNode";
-
-// Helper function to get hierarchy color based on level
-function getHierarchyColor(level: number): string {
-  const colors: Record<number, string> = {
-    0: "#4B69FF", // Blue
-    1: "#5D5AFF", // Blue-Purple
-    2: "#7152FF", // Purple
-    3: "#8B42FF", // Purple-Violet
-    4: "#A32EFF", // Violet
-    5: "#C71AFD", // Pink-Purple
-    6: "#E816FA", // Pink
-  };
-
-  return colors[level] || colors[0];
-}
+};
 
 export default HierarchyNode;
