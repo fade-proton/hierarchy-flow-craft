@@ -12,6 +12,7 @@ export interface HierarchyNodeData {
   description?: string;
   content?: string;
   isActive?: boolean;
+  code?: string;  // Added for the export format
   [key: string]: any;
 }
 
@@ -21,6 +22,7 @@ const categoryColors: Record<string, string> = {
   action: "#8B5CF6", // Purple
   config: "#0EA5E9", // Blue
   default: "#10B981", // Green
+  headquarters: "#FF4500", // Red-Orange for HQ type
 };
 
 // Get the level color based on node level
@@ -73,6 +75,13 @@ const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => 
         <div className="text-center font-medium text-white mb-2">
           {data?.label || "Node"}
         </div>
+        
+        {/* Node code (if available) */}
+        {data?.code && (
+          <div className="text-xs bg-gray-700 px-2 py-1 rounded mb-1 text-center">
+            {data.code}
+          </div>
+        )}
         
         {/* Node description (if available) */}
         {data?.description && (

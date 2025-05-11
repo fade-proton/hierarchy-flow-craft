@@ -19,13 +19,16 @@ import {
   applyEdgeChanges,
 } from "@xyflow/react";
 import { toast } from "sonner";
-import { Plus, Minus, Move, Save, Download, Upload, Undo, Redo } from "lucide-react";
+import { Plus, Minus, Move, Save, Download, Upload, Undo, Redo, FileJson } from "lucide-react";
 
 import "@xyflow/react/dist/style.css";
 import { Sidebar } from "./Sidebar";
 import NodeDrawer from "./NodeDrawer";
 import { Button } from "./ui/button";
 import HierarchyNode, { HierarchyNodeData } from "./HierarchyNode";
+import { nodesToExportFormat, importFormatToNodes, FlowExport, FlowAction, generateNodePath } from "@/utils/flowUtils";
+import { ExportDialog } from "./ExportDialog";
+import { ActionHistory } from "./ActionHistory";
 
 // Define the nodeTypes correctly with proper type casting
 const nodeTypes = {
@@ -41,7 +44,16 @@ export const FlowBuilder = () => {
   const [selectedNode, setSelectedNode] = useState<Node<HierarchyNodeData> | null>(null);
   const [showMinimap, setShowMinimap] = useState(true);
   const [history, setHistory] = useState<{past: Array<{nodes: Node<HierarchyNodeData>[], edges: Edge[]}>, future: Array<{nodes: Node<HierarchyNodeData>[], edges: Edge[]}>}>({past: [], future: []});
+  const [showExportDialog, setShowExportDialog] = useState(false);
+  const [exportData, setExportData] = useState<FlowExport>({ structures: [] });
+  const [actionHistory, setActionHistory] = useState<FlowAction[]>([]);
+  const [showActionHistory, setShowActionHistory] = useState(false);
   const { fitView, zoomIn, zoomOut } = useReactFlow();
+  
+  // Track actions
+  const trackAction = useCallback((action: FlowAction) => {
+    setActionHistory(prev => [action, ...prev]);
+  }, []);
   
   // Handle new connections between nodes
   const onConnect = useCallback((params: Connection) => {
@@ -58,6 +70,21 @@ export const FlowBuilder = () => {
       }, eds)
     );
     
+    // Track this action
+    const sourceNode = nodes.find(n => n.id === params.source);
+    const targetNode = nodes.find(n => n.id === params.target);
+    
+    trackAction({
+      type: 'connection-created',
+      timestamp: Date.now(),
+      details: {
+        sourceId: params.source,
+        targetId: params.target,
+        sourceName: sourceNode?.data.label || params.source,
+        targetName: targetNode?.data.label || params.target
+      }
+    });
+    
     // Save state for undo/redo
     saveToHistory();
     
@@ -65,7 +92,7 @@ export const FlowBuilder = () => {
     setTimeout(() => {
       recalculateLevels();
     }, 0);
-  }, [setEdges]);
+  }, [setEdges, nodes, trackAction]);
   
   // Save current state to history
   const saveToHistory = useCallback(() => {
@@ -178,7 +205,17 @@ export const FlowBuilder = () => {
         }
       }))
     );
-  }, [nodes, edges, setNodes]);
+    
+    // Track this action
+    trackAction({
+      type: 'level-recalculated',
+      timestamp: Date.now(),
+      details: {
+        nodeCount: nodes.length,
+        rootNodeCount: rootNodeIds.length
+      }
+    });
+  }, [nodes, edges, setNodes, trackAction]);
   
   // Handle dropping a new node onto the canvas
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -198,6 +235,11 @@ export const FlowBuilder = () => {
       let entityName = event.dataTransfer.getData("application/reactflow/entityName");
       const nodeCategory = event.dataTransfer.getData("application/reactflow/category");
       
+      // Generate a code for the node based on entity name
+      const nodeCode = entityName
+        ? entityName.split(" ").map(word => word.charAt(0).toUpperCase()).join("")
+        : `N${Math.floor(Math.random() * 1000)}`;
+      
       // When dropping a new entity, always set level to 0 initially
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
@@ -212,10 +254,24 @@ export const FlowBuilder = () => {
           label: entityName || "New Entity",
           level: 0,  // Default level - will be recalculated based on connections
           category: nodeCategory || "default",
+          code: nodeCode,
+          description: ""
         },
       };
 
       setNodes((nds) => [...nds, newNode]);
+      
+      // Track this action
+      trackAction({
+        type: 'node-added',
+        timestamp: Date.now(),
+        details: {
+          id: newNode.id,
+          name: newNode.data.label,
+          type: newNode.data.category
+        }
+      });
+      
       saveToHistory();
       
       // After adding a node, recalculate levels if there are edges
@@ -225,8 +281,66 @@ export const FlowBuilder = () => {
         }, 0);
       }
     },
-    [reactFlowInstance, setNodes, edges, recalculateLevels, saveToHistory]
+    [reactFlowInstance, setNodes, edges, recalculateLevels, saveToHistory, trackAction]
   );
+
+  // Handle node deletion
+  const onNodesDelete = useCallback((deletedNodes: Node<HierarchyNodeData>[]) => {
+    // Track node deletion actions
+    deletedNodes.forEach(node => {
+      trackAction({
+        type: 'node-removed',
+        timestamp: Date.now(),
+        details: {
+          id: node.id,
+          name: node.data.label,
+          type: node.data.category
+        }
+      });
+    });
+    
+    // We don't need to actually delete nodes here, 
+    // as ReactFlow handles that through onNodesChange
+    saveToHistory();
+    
+    // Recalculate levels after deletion if needed
+    if (nodes.length > deletedNodes.length && edges.length > 0) {
+      setTimeout(() => {
+        recalculateLevels();
+      }, 0);
+    }
+  }, [nodes.length, edges.length, recalculateLevels, saveToHistory, trackAction]);
+
+  // Handle edge deletion
+  const onEdgesDelete = useCallback((deletedEdges: Edge[]) => {
+    // Track edge deletion actions
+    deletedEdges.forEach(edge => {
+      const sourceNode = nodes.find(n => n.id === edge.source);
+      const targetNode = nodes.find(n => n.id === edge.target);
+      
+      trackAction({
+        type: 'connection-removed',
+        timestamp: Date.now(),
+        details: {
+          sourceId: edge.source,
+          targetId: edge.target,
+          sourceName: sourceNode?.data.label || edge.source,
+          targetName: targetNode?.data.label || edge.target
+        }
+      });
+    });
+    
+    // We don't need to actually delete edges here, 
+    // as ReactFlow handles that through onEdgesChange
+    saveToHistory();
+    
+    // Recalculate levels after deletion
+    if (nodes.length > 0 && edges.length > deletedEdges.length) {
+      setTimeout(() => {
+        recalculateLevels();
+      }, 0);
+    }
+  }, [nodes, edges.length, recalculateLevels, saveToHistory, trackAction]);
 
   // Handle node selection
   const onNodeClick = useCallback((event: React.MouseEvent, node: Node<HierarchyNodeData>) => {
@@ -298,6 +412,66 @@ export const FlowBuilder = () => {
     document.body.removeChild(link);
   };
 
+  // Handle showing the export dialog
+  const handleOpenExportDialog = () => {
+    const exportData = nodesToExportFormat(nodes, edges);
+    setExportData(exportData);
+    setShowExportDialog(true);
+  };
+  
+  // Handle import from the export dialog
+  const handleImportData = (importData: FlowExport) => {
+    try {
+      const { nodes: importedNodes, edges: importedEdges } = importFormatToNodes(importData);
+      
+      // Set the nodes and edges
+      setNodes(importedNodes);
+      setEdges(importedEdges);
+      
+      // Save to history
+      saveToHistory();
+      
+      // Recalculate levels if needed
+      if (importedNodes.length > 0 && importedEdges.length > 0) {
+        setTimeout(() => {
+          recalculateLevels();
+        }, 0);
+      }
+      
+      // Track import action
+      trackAction({
+        type: 'node-added',
+        timestamp: Date.now(),
+        details: {
+          name: 'Imported flow',
+          type: 'import',
+          nodeCount: importedNodes.length,
+          edgeCount: importedEdges.length
+        }
+      });
+      
+      toast.success(`Imported ${importedNodes.length} nodes and ${importedEdges.length} connections`);
+      
+      // Fit view to show all nodes
+      setTimeout(() => {
+        fitView();
+      }, 100);
+    } catch (error) {
+      toast.error(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Calculate node paths when a node is selected
+  useEffect(() => {
+    if (selectedNode) {
+      const path = generateNodePath(selectedNode.id, nodes, edges);
+      console.log(`Path for ${selectedNode.data.label}: ${path}`);
+      
+      // Could store this on the node itself or use elsewhere
+      // For now, we just log it
+    }
+  }, [selectedNode, nodes, edges]);
+
   // Shortcut key handlers
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -352,6 +526,8 @@ export const FlowBuilder = () => {
           nodeTypes={nodeTypes}
           fitView
           onNodeClick={onNodeClick}
+          onNodesDelete={onNodesDelete}
+          onEdgesDelete={onEdgesDelete}
           attributionPosition="bottom-right"
           deleteKeyCode={["Backspace", "Delete"]}
           className="bg-[#121520]" // Dark background for the canvas
@@ -416,20 +592,43 @@ export const FlowBuilder = () => {
                   <span>Load</span>
                 </Button>
                 <Button 
-                  onClick={exportFlow}
+                  onClick={handleOpenExportDialog}
                   className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
                 >
-                  <Upload size={12} />
-                  <span>Export</span>
+                  <FileJson size={12} />
+                  <span>Export/Import</span>
                 </Button>
               </div>
+              <Button
+                onClick={() => setShowActionHistory(!showActionHistory)}
+                className={`flex items-center space-x-1 px-3 py-1 text-xs rounded transition-colors border ${
+                  showActionHistory 
+                    ? 'bg-[#0FA0CE] text-white border-[#0FA0CE] hover:bg-[#0C8CAE]' 
+                    : 'bg-[#2A304A] text-white border-[#0FA0CE] hover:bg-[#3A405A]'
+                }`}
+              >
+                <span>Action History {actionHistory.length > 0 ? `(${actionHistory.length})` : ''}</span>
+              </Button>
             </div>
+            
+            {showActionHistory && actionHistory.length > 0 && (
+              <div className="mt-4">
+                <ActionHistory actions={actionHistory} />
+              </div>
+            )}
           </Panel>
         </ReactFlow>
         
         {selectedNode && (
           <NodeDrawer node={selectedNode} onUpdate={onNodeUpdate} onClose={() => setSelectedNode(null)} />
         )}
+        
+        <ExportDialog 
+          open={showExportDialog} 
+          onOpenChange={setShowExportDialog}
+          exportData={exportData}
+          onImport={handleImportData}
+        />
       </div>
     </div>
   );
