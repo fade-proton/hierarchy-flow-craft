@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef, useEffect } from "react";
 import {
   ReactFlow,
@@ -10,31 +11,37 @@ import {
   MarkerType,
   Panel,
   Connection,
-  NodeTypes,
   Edge,
   Node,
   BackgroundVariant,
+  useReactFlow,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from "@xyflow/react";
 import { toast } from "sonner";
-import { Plus, Minus, Move, Save, Download, Upload } from "lucide-react";
+import { Plus, Minus, Move, Save, Download, Upload, Undo, Redo } from "lucide-react";
 
 import "@xyflow/react/dist/style.css";
 import { Sidebar } from "./Sidebar";
+import NodeDrawer from "./NodeDrawer";
+import { Button } from "./ui/button";
 import HierarchyNode, { HierarchyNodeData } from "./HierarchyNode";
-import { Input } from "./ui/input";
 
 // Define the nodeTypes correctly with proper type casting
-const nodeTypes: NodeTypes = {
-  hierarchyNode: HierarchyNode as any, // Use type assertion as a workaround
+const nodeTypes = {
+  hierarchyNode: HierarchyNode,
 };
 
 export const FlowBuilder = () => {
-  // ... keep existing code (state declarations and other code)
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [entityName, setEntityName] = useState("");
+  const [selectedNode, setSelectedNode] = useState<Node<HierarchyNodeData> | null>(null);
+  const [showMinimap, setShowMinimap] = useState(true);
+  const [history, setHistory] = useState<{past: Array<{nodes: Node<HierarchyNodeData>[], edges: Edge[]}>, future: Array<{nodes: Node<HierarchyNodeData>[], edges: Edge[]}>}>({past: [], future: []});
+  const { fitView, zoomIn, zoomOut } = useReactFlow();
   
   // Handle new connections between nodes
   const onConnect = useCallback((params: Connection) => {
@@ -51,12 +58,57 @@ export const FlowBuilder = () => {
       }, eds)
     );
     
+    // Save state for undo/redo
+    saveToHistory();
+    
     // Recalculate levels after adding a new connection
     setTimeout(() => {
       recalculateLevels();
     }, 0);
   }, [setEdges]);
   
+  // Save current state to history
+  const saveToHistory = useCallback(() => {
+    setHistory(h => ({
+      past: [...h.past, {nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges))}],
+      future: []
+    }));
+  }, [nodes, edges]);
+
+  // Undo function
+  const undo = useCallback(() => {
+    if (history.past.length === 0) return;
+    
+    const newPast = [...history.past];
+    const previous = newPast.pop();
+    if (!previous) return;
+    
+    setHistory({
+      past: newPast,
+      future: [{ nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) }, ...history.future]
+    });
+    
+    setNodes(previous.nodes);
+    setEdges(previous.edges);
+  }, [history, nodes, edges, setNodes, setEdges]);
+
+  // Redo function
+  const redo = useCallback(() => {
+    if (history.future.length === 0) return;
+    
+    const newFuture = [...history.future];
+    const next = newFuture.shift();
+    if (!next) return;
+    
+    setHistory({
+      past: [...history.past, { nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) }],
+      future: newFuture
+    });
+    
+    setNodes(next.nodes);
+    setEdges(next.edges);
+  }, [history, nodes, edges, setNodes, setEdges]);
+
   // Function to recalculate all node levels based on connections
   const recalculateLevels = useCallback(() => {
     // Find all root nodes (no incoming edges)
@@ -142,6 +194,10 @@ export const FlowBuilder = () => {
         return;
       }
 
+      const nodeType = event.dataTransfer.getData("application/reactflow/type");
+      let entityName = event.dataTransfer.getData("application/reactflow/entityName");
+      const nodeCategory = event.dataTransfer.getData("application/reactflow/category");
+      
       // When dropping a new entity, always set level to 0 initially
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
@@ -155,11 +211,12 @@ export const FlowBuilder = () => {
         data: { 
           label: entityName || "New Entity",
           level: 0,  // Default level - will be recalculated based on connections
+          category: nodeCategory || "default",
         },
       };
 
       setNodes((nds) => [...nds, newNode]);
-      setEntityName("");  // Clear input field after creating node
+      saveToHistory();
       
       // After adding a node, recalculate levels if there are edges
       if (edges.length > 0) {
@@ -168,8 +225,23 @@ export const FlowBuilder = () => {
         }, 0);
       }
     },
-    [reactFlowInstance, setNodes, entityName, edges, recalculateLevels]
+    [reactFlowInstance, setNodes, edges, recalculateLevels]
   );
+
+  // Handle node selection
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    setSelectedNode(node);
+  }, []);
+  
+  // Handle node updates from the drawer
+  const onNodeUpdate = useCallback((updatedNode: Node<HierarchyNodeData>) => {
+    setNodes(nds => 
+      nds.map(node => 
+        node.id === updatedNode.id ? updatedNode : node
+      )
+    );
+    saveToHistory();
+  }, [setNodes]);
   
   // Function to save the current flow
   const saveFlow = () => {
@@ -193,6 +265,7 @@ export const FlowBuilder = () => {
         setNodes(savedNodes);
         setEdges(savedEdges);
         toast.success("Flow loaded successfully");
+        saveToHistory();
         
         // Recalculate levels after loading
         setTimeout(() => {
@@ -225,6 +298,35 @@ export const FlowBuilder = () => {
     document.body.removeChild(link);
   };
 
+  // Shortcut key handlers
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey) {
+        if (event.key === 'z') {
+          event.preventDefault();
+          undo();
+        }
+        if (event.key === 'y') {
+          event.preventDefault();
+          redo();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [undo, redo]);
+
+  // Initialize history
+  useEffect(() => {
+    if (nodes.length > 0 && history.past.length === 0) {
+      saveToHistory();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Recalculate levels whenever edges change
   useEffect(() => {
     if (edges.length > 0 && nodes.length > 0) {
@@ -237,11 +339,11 @@ export const FlowBuilder = () => {
     <div className="flex h-full w-full">
       <Sidebar />
       
-      <div className="flex-1 h-full" ref={reactFlowWrapper}>
+      <div className="flex-1 h-full relative" ref={reactFlowWrapper}>
         <ReactFlow
-          nodes={nodes as any}
+          nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange as any}
+          onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           onInit={setReactFlowInstance}
@@ -249,90 +351,85 @@ export const FlowBuilder = () => {
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView
+          onNodeClick={onNodeClick}
           attributionPosition="bottom-right"
           deleteKeyCode={["Backspace", "Delete"]}
           className="bg-[#121520]" // Dark background for the canvas
         >
           <Background 
             color="#333" 
-            gap={24} 
-            size={2}
-            variant={BackgroundVariant.DOTS}  // Using the correct enum value
+            gap={20} 
+            size={1}
+            variant={BackgroundVariant.DOTS}
           />
           <Controls className="bg-[#1A1F2C] border border-gray-700 text-white rounded-md overflow-hidden" />
-          <MiniMap 
-            nodeStrokeWidth={3} 
-            zoomable 
-            pannable
-            className="bg-[#1A1F2C] border border-gray-700"
-          />
+          {showMinimap && (
+            <MiniMap 
+              nodeStrokeWidth={3} 
+              zoomable 
+              pannable
+              className="bg-[#1A1F2C] border border-gray-700"
+            />
+          )}
+          <Panel position="top-right" className="bg-[#1A1F2C] border border-gray-700 p-2 rounded-md shadow-md flex space-x-2">
+            <Button variant="outline" size="sm" onClick={() => zoomIn()} className="bg-[#242938] text-white hover:bg-[#2A304A]">
+              <Plus size={14} />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => zoomOut()} className="bg-[#242938] text-white hover:bg-[#2A304A]">
+              <Minus size={14} />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => fitView()} className="bg-[#242938] text-white hover:bg-[#2A304A]">
+              <Move size={14} />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowMinimap(!showMinimap)} 
+              className={`bg-[#242938] text-white hover:bg-[#2A304A] ${showMinimap ? 'border-[#0FA0CE]' : ''}`}
+            >
+              Map
+            </Button>
+          </Panel>
           <Panel position="top-left" className="bg-[#1A1F2C] border border-gray-700 p-4 rounded-md shadow-md">
             <div className="flex flex-col space-y-3">
-              <h3 className="text-sm font-bold text-white">Add New Entity</h3>
-              <div className="flex items-center space-x-2">
-                <Input 
-                  value={entityName}
-                  onChange={(e) => setEntityName(e.target.value)}
-                  placeholder="Entity Name"
-                  className="text-sm bg-[#242938] text-white border-gray-700"
-                />
-                <button
-                  className="p-2 bg-[#0FA0CE] text-white rounded hover:bg-[#0b8cba] transition-colors"
-                  onClick={() => {
-                    if (entityName.trim() && reactFlowInstance) {
-                      const newNode: Node<HierarchyNodeData> = {
-                        id: `node-${Date.now()}`,
-                        type: "hierarchyNode",
-                        position: {
-                          x: Math.random() * 500,
-                          y: Math.random() * 500
-                        },
-                        data: { 
-                          label: entityName,
-                          level: 0, // Default level - will be recalculated
-                        },
-                      };
-                      setNodes((nds) => [...nds, newNode] as any);
-                      setEntityName("");
-                      
-                      // Recalculate levels if there are edges
-                      if (edges.length > 0) {
-                        setTimeout(() => {
-                          recalculateLevels();
-                        }, 0);
-                      }
-                    }
-                  }}
-                >
-                  <Plus size={16} />
-                </button>
+              <div className="flex space-x-2 mb-2">
+                <Button variant="outline" size="sm" onClick={undo} className="bg-[#242938] text-white hover:bg-[#2A304A]" disabled={history.past.length === 0}>
+                  <Undo size={14} />
+                </Button>
+                <Button variant="outline" size="sm" onClick={redo} className="bg-[#242938] text-white hover:bg-[#2A304A]" disabled={history.future.length === 0}>
+                  <Redo size={14} />
+                </Button>
               </div>
               <div className="flex space-x-2">
-                <button 
+                <Button 
                   onClick={saveFlow}
                   className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
                 >
                   <Save size={12} />
                   <span>Save</span>
-                </button>
-                <button 
+                </Button>
+                <Button 
                   onClick={loadFlow}
                   className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
                 >
                   <Download size={12} />
                   <span>Load</span>
-                </button>
-                <button 
+                </Button>
+                <Button 
                   onClick={exportFlow}
                   className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
                 >
                   <Upload size={12} />
                   <span>Export</span>
-                </button>
+                </Button>
               </div>
             </div>
           </Panel>
         </ReactFlow>
+        
+        {selectedNode && (
+          <NodeDrawer node={selectedNode} onUpdate={onNodeUpdate} onClose={() => setSelectedNode(null)} />
+        )}
       </div>
     </div>
   );

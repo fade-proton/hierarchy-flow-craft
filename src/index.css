@@ -103,32 +103,47 @@
 
 /* Flow Builder Specific Styles */
 .react-flow__node {
-  border-radius: 0; /* Square nodes */
-  padding: 10px;
+  padding: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
 }
 
 .react-flow__node:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .react-flow__node.selected {
-  box-shadow: 0 0 0 2px #0FA0CE, 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 15px rgba(15, 160, 206, 0.5), 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .react-flow__handle {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background-color: #0FA0CE;
-  border: 2px solid #FFFFFF;
+  background-color: #ffffff;
+  border: 2px solid #0FA0CE;
+  transition: all 0.2s ease;
+  z-index: 10;
 }
 
 .react-flow__handle:hover {
-  background-color: #0b8cba;
   transform: scale(1.2);
+}
+
+.react-flow__handle-top {
+  top: -6px;
+}
+
+.react-flow__handle-right {
+  right: -6px;
+}
+
+.react-flow__handle-bottom {
+  bottom: -6px;
+}
+
+.react-flow__handle-left {
+  left: -6px;
 }
 
 .react-flow__edge-path {
@@ -166,7 +181,51 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
+/* Custom styles for our application */
+.shadow-glow {
+  box-shadow: 0 0 15px rgba(15, 160, 206, 0.5);
+}
+
 /* Drawer Animation */
 .vaul-drawer {
   transition: transform 0.3s ease;
+}
+
+/* Background pattern for the canvas */
+.react-flow__background {
+  background-color: #121520;
+}
+
+/* Specific handle positioning to avoid overlaps */
+.react-flow__handle#left-source {
+  top: 30%;
+}
+
+.react-flow__handle#left-target {
+  top: 70%;
+}
+
+.react-flow__handle#right-source {
+  top: 30%;
+}
+
+.react-flow__handle#right-target {
+  top: 70%;
+}
+
+/* Animation for hover effects */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(15, 160, 206, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(15, 160, 206, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(15, 160, 206, 0.5);
+  }
+}
+
+.animate-glow {
+  animation: glow 2s infinite;
 }
