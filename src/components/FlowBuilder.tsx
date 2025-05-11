@@ -15,8 +15,6 @@ import {
   Node,
   BackgroundVariant,
   useReactFlow,
-  applyNodeChanges,
-  applyEdgeChanges,
 } from "@xyflow/react";
 import { toast } from "sonner";
 import { Plus, Minus, Move, Save, Download, Upload, Undo, Redo, FileJson } from "lucide-react";

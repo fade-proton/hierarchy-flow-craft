@@ -1,7 +1,7 @@
 
 // Flow utility functions for JSON export/import, history tracking
 
-import { Node, Edge } from "@xyflow/react";
+import { Node, Edge, MarkerType } from "@xyflow/react";
 import { HierarchyNodeData } from "@/components/HierarchyNode";
 
 export interface FlowStructure {
@@ -98,7 +98,7 @@ export const importFormatToNodes = (
         animated: true,
         style: { stroke: "#0FA0CE", strokeWidth: 2 },
         markerEnd: {
-          type: "arrowClosed",
+          type: MarkerType.ArrowClosed,
           color: "#0FA0CE",
         },
       });
