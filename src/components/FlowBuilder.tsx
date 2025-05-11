@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useEffect } from "react";
 import {
   ReactFlow,
@@ -526,7 +525,7 @@ export const FlowBuilder = () => {
           onEdgesDelete={onEdgesDelete}
           attributionPosition="bottom-right"
           deleteKeyCode={["Backspace", "Delete"]}
-          className="bg-[#121520]" // Dark background for the canvas
+          className="bg-white" // Changed from bg-[#121520] to bg-white
         >
           <Background 
             color="#333" 
