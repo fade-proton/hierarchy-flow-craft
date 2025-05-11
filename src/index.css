@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -34,7 +35,7 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 0%;  /* Changed to black */
+    --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
 
@@ -192,7 +193,7 @@
 
 /* Background pattern for the canvas */
 .react-flow__background {
-  background-color: #ffffff;  /* Changed from dark to white */
+  background-color: #121520;
 }
 
 /* Specific handle positioning to avoid overlaps */
