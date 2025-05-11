@@ -35,7 +35,7 @@ const nodeTypes = {
 
 export const FlowBuilder = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>[]>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [entityName, setEntityName] = useState("");
