@@ -35,7 +35,7 @@ const nodeTypes = {
 
 export const FlowBuilder = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState<HierarchyNodeData>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>[]>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [entityName, setEntityName] = useState("");
@@ -438,11 +438,9 @@ export const FlowBuilder = () => {
       
       // Track import action
       trackAction({
-        type: 'node-added',
+        type: 'flow-imported',
         timestamp: Date.now(),
         details: {
-          name: 'Imported flow',
-          type: 'import',
           nodeCount: importedNodes.length,
           edgeCount: importedEdges.length
         }

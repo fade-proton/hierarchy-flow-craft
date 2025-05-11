@@ -19,7 +19,7 @@ export interface FlowExport {
 }
 
 export interface FlowAction {
-  type: 'node-added' | 'node-removed' | 'connection-created' | 'connection-removed' | 'level-recalculated';
+  type: 'node-added' | 'node-removed' | 'connection-created' | 'connection-removed' | 'level-recalculated' | 'flow-imported';
   timestamp: number;
   details: Record<string, any>;
 }
