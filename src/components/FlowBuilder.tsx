@@ -34,7 +34,7 @@ const nodeTypes = {
 
 export const FlowBuilder = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<HierarchyNodeData>[]>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
   const [entityName, setEntityName] = useState("");
@@ -225,11 +225,11 @@ export const FlowBuilder = () => {
         }, 0);
       }
     },
-    [reactFlowInstance, setNodes, edges, recalculateLevels]
+    [reactFlowInstance, setNodes, edges, recalculateLevels, saveToHistory]
   );
 
   // Handle node selection
-  const onNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+  const onNodeClick = useCallback((event: React.MouseEvent, node: Node<HierarchyNodeData>) => {
     setSelectedNode(node);
   }, []);
   
@@ -241,7 +241,7 @@ export const FlowBuilder = () => {
       )
     );
     saveToHistory();
-  }, [setNodes]);
+  }, [setNodes, saveToHistory]);
   
   // Function to save the current flow
   const saveFlow = () => {
@@ -360,7 +360,7 @@ export const FlowBuilder = () => {
             color="#333" 
             gap={20} 
             size={1}
-            variant={BackgroundVariant.DOTS}
+            variant={BackgroundVariant.Dots}
           />
           <Controls className="bg-[#1A1F2C] border border-gray-700 text-white rounded-md overflow-hidden" />
           {showMinimap && (
