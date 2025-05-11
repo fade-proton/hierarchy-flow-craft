@@ -43,6 +43,7 @@ const getLevelColor = (level: number = 0): string => {
 // HierarchyNode component
 const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => {
   const [isHovered, setIsHovered] = useState(false);
+  const isDarkMode = document.documentElement.classList.contains('dark');
   
   // Get border color based on category or hierarchy level
   const getBorderColor = (): string => {
@@ -58,7 +59,7 @@ const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => 
     <div 
       className={cn(
         "px-4 py-4 rounded-[15px] w-[150px] h-[150px]", 
-        "bg-[#1A1F2C] text-white shadow-lg", 
+        isDarkMode ? "bg-[#1A1F2C] text-white" : "bg-white text-gray-800 shadow-lg", 
         "hover:bg-[#242938] transition-colors",
         "border-2",
         selected ? "shadow-glow" : ""
@@ -72,26 +73,26 @@ const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => 
     >
       <div className="flex flex-col h-full relative">
         {/* Node label */}
-        <div className="text-center font-medium text-white mb-2">
+        <div className="text-center font-medium mb-2">
           {data?.label || "Node"}
         </div>
         
         {/* Node code (if available) */}
         {data?.code && (
-          <div className="text-xs bg-gray-700 px-2 py-1 rounded mb-1 text-center">
+          <div className={`text-xs px-2 py-1 rounded mb-1 text-center ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
             {data.code}
           </div>
         )}
         
         {/* Node description (if available) */}
         {data?.description && (
-          <div className="text-xs text-gray-300 overflow-hidden max-h-[60px] mb-2">
+          <div className={`text-xs overflow-hidden max-h-[60px] mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
             {data.description}
           </div>
         )}
         
         {/* Node level indicator */}
-        <div className="text-xs text-gray-400 mt-auto">
+        <div className={`text-xs mt-auto ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           Level: {data?.level !== undefined ? data.level : 0}
         </div>
         
@@ -103,10 +104,10 @@ const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => 
         {/* Action buttons (visible on hover) */}
         {isHovered && (
           <div className="absolute top-1 right-1 flex space-x-1">
-            <button className="p-1 rounded-sm hover:bg-[#2A304A] text-gray-300">
+            <button className={`p-1 rounded-sm ${isDarkMode ? 'hover:bg-[#2A304A] text-gray-300' : 'hover:bg-gray-200 text-gray-600'}`}>
               <Settings size={16} />
             </button>
-            <button className="p-1 rounded-sm hover:bg-[#2A304A] text-gray-300">
+            <button className={`p-1 rounded-sm ${isDarkMode ? 'hover:bg-[#2A304A] text-gray-300' : 'hover:bg-gray-200 text-gray-600'}`}>
               <Trash size={16} />
             </button>
           </div>

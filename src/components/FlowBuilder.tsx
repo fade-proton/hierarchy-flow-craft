@@ -17,7 +17,7 @@ import {
   useReactFlow,
 } from "@xyflow/react";
 import { toast } from "sonner";
-import { Plus, Minus, Move, Save, Download, Upload, Undo, Redo, FileJson } from "lucide-react";
+import { Plus, Minus, Move, Save, Download, Upload, Undo, Redo, FileJson, Moon, Sun, Calculator } from "lucide-react";
 
 import "@xyflow/react/dist/style.css";
 import { Sidebar } from "./Sidebar";
@@ -46,6 +46,7 @@ export const FlowBuilder = () => {
   const [exportData, setExportData] = useState<FlowExport>({ structures: [] });
   const [actionHistory, setActionHistory] = useState<FlowAction[]>([]);
   const [showActionHistory, setShowActionHistory] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const { fitView, zoomIn, zoomOut } = useReactFlow();
   
   // Track actions
@@ -213,6 +214,8 @@ export const FlowBuilder = () => {
         rootNodeCount: rootNodeIds.length
       }
     });
+
+    toast.success(`Level rank recalculated for ${nodes.length} nodes`);
   }, [nodes, edges, setNodes, trackAction]);
   
   // Handle dropping a new node onto the canvas
@@ -505,8 +508,19 @@ export const FlowBuilder = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Toggle dark/light mode
+  const toggleDarkMode = useCallback(() => {
+    setIsDarkMode(prev => !prev);
+    document.documentElement.classList.toggle('dark', !isDarkMode);
+  }, [isDarkMode]);
+
+  // Apply dark mode on component mount
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDarkMode);
+  }, [isDarkMode]);
+
   return (
-    <div className="flex h-full w-full">
+    <div className={`flex h-full w-full ${isDarkMode ? 'dark' : ''}`}>
       <Sidebar />
       
       <div className="flex-1 h-full relative" ref={reactFlowWrapper}>
@@ -526,70 +540,88 @@ export const FlowBuilder = () => {
           onEdgesDelete={onEdgesDelete}
           attributionPosition="bottom-right"
           deleteKeyCode={["Backspace", "Delete"]}
-          className="bg-[#121520]" // Dark background for the canvas
+          className={isDarkMode ? "bg-[#121520]" : "bg-white"}
         >
           <Background 
-            color="#333" 
+            color={isDarkMode ? "#333" : "#d9d9d9"} 
             gap={20} 
             size={1}
             variant={BackgroundVariant.Dots}
           />
-          <Controls className="bg-[#1A1F2C] border border-gray-700 text-white rounded-md overflow-hidden" />
+          <Controls className={isDarkMode ? "bg-[#1A1F2C] border border-gray-700 text-white rounded-md overflow-hidden" : "bg-white border border-gray-300 text-gray-700 rounded-md overflow-hidden"} />
           {showMinimap && (
             <MiniMap 
               nodeStrokeWidth={3} 
               zoomable 
               pannable
-              className="bg-[#1A1F2C] border border-gray-700"
+              className={isDarkMode ? "bg-[#1A1F2C] border border-gray-700" : "bg-white border border-gray-300"}
             />
           )}
-          <Panel position="top-right" className="bg-[#1A1F2C] border border-gray-700 p-2 rounded-md shadow-md flex space-x-2">
-            <Button variant="outline" size="sm" onClick={() => zoomIn()} className="bg-[#242938] text-white hover:bg-[#2A304A]">
+          <Panel position="top-right" className={isDarkMode ? "bg-[#1A1F2C] border border-gray-700 p-2 rounded-md shadow-md flex space-x-2" : "bg-white border border-gray-300 p-2 rounded-md shadow-md flex space-x-2"}>
+            <Button variant="outline" size="sm" onClick={toggleDarkMode} className={isDarkMode ? "bg-[#242938] text-white hover:bg-[#2A304A]" : "bg-white text-gray-700 hover:bg-gray-100"}>
+              {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => zoomIn()} className={isDarkMode ? "bg-[#242938] text-white hover:bg-[#2A304A]" : "bg-white text-gray-700 hover:bg-gray-100"}>
               <Plus size={14} />
             </Button>
-            <Button variant="outline" size="sm" onClick={() => zoomOut()} className="bg-[#242938] text-white hover:bg-[#2A304A]">
+            <Button variant="outline" size="sm" onClick={() => zoomOut()} className={isDarkMode ? "bg-[#242938] text-white hover:bg-[#2A304A]" : "bg-white text-gray-700 hover:bg-gray-100"}>
               <Minus size={14} />
             </Button>
-            <Button variant="outline" size="sm" onClick={() => fitView()} className="bg-[#242938] text-white hover:bg-[#2A304A]">
+            <Button variant="outline" size="sm" onClick={() => fitView()} className={isDarkMode ? "bg-[#242938] text-white hover:bg-[#2A304A]" : "bg-white text-gray-700 hover:bg-gray-100"}>
               <Move size={14} />
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => setShowMinimap(!showMinimap)} 
-              className={`bg-[#242938] text-white hover:bg-[#2A304A] ${showMinimap ? 'border-[#0FA0CE]' : ''}`}
+              className={`${isDarkMode ? 'bg-[#242938] text-white hover:bg-[#2A304A]' : 'bg-white text-gray-700 hover:bg-gray-100'} ${showMinimap ? (isDarkMode ? 'border-[#0FA0CE]' : 'border-blue-500') : ''}`}
             >
               Map
             </Button>
           </Panel>
-          <Panel position="top-left" className="bg-[#1A1F2C] border border-gray-700 p-4 rounded-md shadow-md">
+          <Panel position="top-left" className={isDarkMode ? "bg-[#1A1F2C] border border-gray-700 p-4 rounded-md shadow-md" : "bg-white border border-gray-300 p-4 rounded-md shadow-md"}>
             <div className="flex flex-col space-y-3">
               <div className="flex space-x-2 mb-2">
-                <Button variant="outline" size="sm" onClick={undo} className="bg-[#242938] text-white hover:bg-[#2A304A]" disabled={history.past.length === 0}>
+                <Button variant="outline" size="sm" onClick={undo} className={isDarkMode ? "bg-[#242938] text-white hover:bg-[#2A304A]" : "bg-white text-gray-700 hover:bg-gray-100"} disabled={history.past.length === 0}>
                   <Undo size={14} />
                 </Button>
-                <Button variant="outline" size="sm" onClick={redo} className="bg-[#242938] text-white hover:bg-[#2A304A]" disabled={history.future.length === 0}>
+                <Button variant="outline" size="sm" onClick={redo} className={isDarkMode ? "bg-[#242938] text-white hover:bg-[#2A304A]" : "bg-white text-gray-700 hover:bg-gray-100"} disabled={history.future.length === 0}>
                   <Redo size={14} />
+                </Button>
+                <Button variant="outline" size="sm" onClick={recalculateLevels} className={isDarkMode ? "bg-[#242938] text-white hover:bg-[#2A304A]" : "bg-white text-gray-700 hover:bg-gray-100"}>
+                  <Calculator size={14} />
                 </Button>
               </div>
               <div className="flex space-x-2">
                 <Button 
                   onClick={saveFlow}
-                  className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
+                  className={`flex items-center space-x-1 px-3 py-1 text-xs rounded transition-colors border ${
+                    isDarkMode 
+                      ? 'bg-[#2A304A] text-white border-[#0FA0CE] hover:bg-[#3A405A]' 
+                      : 'bg-white text-gray-700 border-blue-500 hover:bg-gray-100'
+                  }`}
                 >
                   <Save size={12} />
                   <span>Save</span>
                 </Button>
                 <Button 
                   onClick={loadFlow}
-                  className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
+                  className={`flex items-center space-x-1 px-3 py-1 text-xs rounded transition-colors border ${
+                    isDarkMode 
+                      ? 'bg-[#2A304A] text-white border-[#0FA0CE] hover:bg-[#3A405A]' 
+                      : 'bg-white text-gray-700 border-blue-500 hover:bg-gray-100'
+                  }`}
                 >
                   <Download size={12} />
                   <span>Load</span>
                 </Button>
                 <Button 
                   onClick={handleOpenExportDialog}
-                  className="flex items-center space-x-1 px-3 py-1 bg-[#2A304A] text-white text-xs rounded hover:bg-[#3A405A] transition-colors border border-[#0FA0CE]"
+                  className={`flex items-center space-x-1 px-3 py-1 text-xs rounded transition-colors border ${
+                    isDarkMode 
+                      ? 'bg-[#2A304A] text-white border-[#0FA0CE] hover:bg-[#3A405A]' 
+                      : 'bg-white text-gray-700 border-blue-500 hover:bg-gray-100'
+                  }`}
                 >
                   <FileJson size={12} />
                   <span>Export/Import</span>
@@ -599,8 +631,8 @@ export const FlowBuilder = () => {
                 onClick={() => setShowActionHistory(!showActionHistory)}
                 className={`flex items-center space-x-1 px-3 py-1 text-xs rounded transition-colors border ${
                   showActionHistory 
-                    ? 'bg-[#0FA0CE] text-white border-[#0FA0CE] hover:bg-[#0C8CAE]' 
-                    : 'bg-[#2A304A] text-white border-[#0FA0CE] hover:bg-[#3A405A]'
+                    ? (isDarkMode ? 'bg-[#0FA0CE] text-white border-[#0FA0CE] hover:bg-[#0C8CAE]' : 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600') 
+                    : (isDarkMode ? 'bg-[#2A304A] text-white border-[#0FA0CE] hover:bg-[#3A405A]' : 'bg-white text-gray-700 border-blue-500 hover:bg-gray-100')
                 }`}
               >
                 <span>Action History {actionHistory.length > 0 ? `(${actionHistory.length})` : ''}</span>
