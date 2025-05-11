@@ -53,7 +53,7 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 bg-[#1A1F2C] text-white border-r border-gray-700 p-4 overflow-y-auto">
+    <aside className="w-64 bg-[#111111] text-white border-r border-gray-700 p-4 overflow-y-auto">
       <h2 className="text-lg font-semibold mb-4 flex items-center">
         <LayoutDashboard size={18} className="mr-2" />
         Flow Builder
