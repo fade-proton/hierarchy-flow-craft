@@ -9,7 +9,13 @@ import {
   Workflow,
   Settings,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Database,
+  FileCode,
+  MessageCircle,
+  Zap,
+  Target,
+  Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +33,12 @@ export const Sidebar = () => {
     { name: "input", title: "User Input", icon: MousePointer, color: "#F97316", expanded: true },
     { name: "action", title: "Action", icon: Workflow, color: "#8B5CF6", expanded: true },
     { name: "config", title: "Configuration", icon: Settings, color: "#0EA5E9", expanded: true },
+    { name: "data", title: "Database", icon: Database, color: "#10B981", expanded: true },
+    { name: "integration", title: "Integration", icon: FileCode, color: "#D946EF", expanded: true },
+    { name: "communication", title: "Communication", icon: MessageCircle, color: "#EC4899", expanded: true },
+    { name: "trigger", title: "Trigger", icon: Zap, color: "#FBBF24", expanded: false },
+    { name: "target", title: "Target", icon: Target, color: "#06B6D4", expanded: false },
+    { name: "security", title: "Security", icon: Shield, color: "#14B8A6", expanded: false },
   ]);
   
   // Handle the drag start event for dragging from sidebar to canvas
@@ -116,9 +128,13 @@ export const Sidebar = () => {
               <div 
                 className={cn(
                   "p-2 mt-1 border rounded-md cursor-move",
-                  "flex items-center justify-between"
+                  "flex items-center justify-between transition-all duration-300"
                 )}
-                style={{ borderColor: category.color, backgroundColor: `${category.color}20` }}
+                style={{ 
+                  borderColor: category.color, 
+                  backgroundColor: `${category.color}10`,
+                  boxShadow: `0 0 8px ${category.color}40` 
+                }}
                 draggable={true}
                 onDragStart={(event) => 
                   onDragStart(
@@ -128,8 +144,14 @@ export const Sidebar = () => {
                     category.name
                   )
                 }
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = `0 0 15px ${category.color}70`;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = `0 0 8px ${category.color}40`;
+                }}
               >
-                <div className="text-sm">{`New ${category.title}`}</div>
+                <div className="text-sm" style={{ color: category.color }}>{`New ${category.title}`}</div>
                 <Plus size={14} style={{ color: category.color }} />
               </div>
             )}

@@ -17,4 +17,10 @@ export const NODE_TYPES: Record<string, string> = {
   action: 'Action',
   config: 'Configuration',
   headquarters: 'Headquarters',
+  data: 'Database',
+  integration: 'Integration',
+  communication: 'Communication',
+  trigger: 'Trigger',
+  target: 'Target',
+  security: 'Security',
 };

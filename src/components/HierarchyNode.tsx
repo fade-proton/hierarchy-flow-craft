@@ -23,6 +23,12 @@ const categoryColors: Record<string, string> = {
   config: "#0EA5E9", // Blue
   default: "#10B981", // Green
   headquarters: "#FF4500", // Red-Orange for HQ type
+  data: "#10B981", // Green
+  integration: "#D946EF", // Magenta Pink 
+  communication: "#EC4899", // Pink
+  trigger: "#FBBF24", // Yellow
+  target: "#06B6D4", // Cyan
+  security: "#14B8A6", // Teal
 };
 
 // Get the level color based on node level
@@ -41,7 +47,7 @@ const getLevelColor = (level: number = 0): string => {
 };
 
 // HierarchyNode component
-const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => {
+const HierarchyNode = ({ id, data, selected }: NodeProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const isDarkMode = document.documentElement.classList.contains('dark');
   
@@ -66,7 +72,8 @@ const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => 
       )}
       style={{ 
         borderColor: borderColor,
-        boxShadow: selected ? `0 0 15px ${borderColor}80` : "none"
+        boxShadow: selected ? `0 0 15px ${borderColor}80` : isHovered ? `0 0 10px ${borderColor}60` : "none",
+        transition: "all 0.3s ease"
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -88,6 +95,19 @@ const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => 
         {data?.description && (
           <div className={`text-xs overflow-hidden max-h-[60px] mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
             {data.description}
+          </div>
+        )}
+        
+        {/* Category indicator if available */}
+        {data?.category && (
+          <div className="text-xs mt-auto flex items-center">
+            <span 
+              className="w-2 h-2 rounded-full mr-1" 
+              style={{ backgroundColor: categoryColors[data.category] || borderColor }}
+            ></span>
+            <span style={{ color: categoryColors[data.category] || borderColor }}>
+              {data.category.charAt(0).toUpperCase() + data.category.slice(1)}
+            </span>
           </div>
         )}
         
