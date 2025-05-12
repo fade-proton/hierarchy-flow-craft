@@ -1,21 +1,19 @@
 
 import { DragEvent, useState } from "react";
-import { Input } from "./ui/input";
 import { 
   Plus, 
   HelpCircle, 
-  LayoutDashboard, 
-  MousePointer,
-  Workflow,
-  Settings,
-  ChevronDown,
-  ChevronRight,
-  Database,
-  FileCode,
-  MessageCircle,
-  Zap,
-  Target,
-  Shield
+  LayoutDashboard,
+  Diamond,
+  Sparkles,
+  GalleryVerticalEnd,
+  Gem,
+  CrownIcon,
+  PanelTop,
+  Star,
+  Sun,
+  Hexagon,
+  Snowflake
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,17 +26,17 @@ type NodeCategory = {
 };
 
 export const Sidebar = () => {
-  const [newEntityName, setNewEntityName] = useState("");
   const [categories, setCategories] = useState<NodeCategory[]>([
-    { name: "input", title: "User Input", icon: MousePointer, color: "#F97316", expanded: true },
-    { name: "action", title: "Action", icon: Workflow, color: "#8B5CF6", expanded: true },
-    { name: "config", title: "Configuration", icon: Settings, color: "#0EA5E9", expanded: true },
-    { name: "data", title: "Database", icon: Database, color: "#10B981", expanded: true },
-    { name: "integration", title: "Integration", icon: FileCode, color: "#D946EF", expanded: true },
-    { name: "communication", title: "Communication", icon: MessageCircle, color: "#EC4899", expanded: true },
-    { name: "trigger", title: "Trigger", icon: Zap, color: "#FBBF24", expanded: false },
-    { name: "target", title: "Target", icon: Target, color: "#06B6D4", expanded: false },
-    { name: "security", title: "Security", icon: Shield, color: "#14B8A6", expanded: false },
+    { name: "jasper", title: "Jasper", icon: GalleryVerticalEnd, color: "#F97316", expanded: true },
+    { name: "gold", title: "Gold", icon: Sparkles, color: "#8B5CF6", expanded: true },
+    { name: "sapphire", title: "Sapphire", icon: Snowflake, color: "#0EA5E9", expanded: true },
+    { name: "emerald", title: "Emerald", icon: Gem, color: "#10B981", expanded: true },
+    { name: "topaz", title: "Topaz", icon: Star, color: "#D946EF", expanded: true },
+    { name: "amethyst", title: "Amethyst", icon: PanelTop, color: "#EC4899", expanded: true },
+    { name: "ruby", title: "Ruby", icon: Hexagon, color: "#FBBF24", expanded: true },
+    { name: "citrine", title: "Citrine", icon: Sun, color: "#06B6D4", expanded: true },
+    { name: "diamond", title: "Diamond", icon: Diamond, color: "#14B8A6", expanded: true },
+    { name: "quartz", title: "Quartz", icon: CrownIcon, color: "#6366F1", expanded: true },
   ]);
   
   // Handle the drag start event for dragging from sidebar to canvas
@@ -74,41 +72,9 @@ export const Sidebar = () => {
         Create and connect nodes to build your workflow.
       </p>
       
-      <div className="mb-4 p-3 border border-gray-700 rounded-md bg-[#242938]">
-        <h3 className="text-sm font-medium mb-2 flex items-center">
-          <Plus size={14} className="mr-1" />
-          New Entity
-        </h3>
-        <div className="flex items-center space-x-2">
-          <Input
-            value={newEntityName}
-            onChange={(e) => setNewEntityName(e.target.value)}
-            placeholder="Entity Name"
-            className="text-sm bg-[#1A1F2C] border-gray-700 text-white"
-          />
-        </div>
-        
-        <div 
-          className="mt-3 p-3 border border-[#0FA0CE] rounded-md bg-[#2A304A] cursor-move flex items-center justify-between"
-          draggable={newEntityName.trim().length > 0}
-          onDragStart={(event) => 
-            onDragStart(event, "hierarchyNode", newEntityName)
-          }
-          style={{
-            opacity: newEntityName.trim().length > 0 ? 1 : 0.5,
-          }}
-        >
-          <div>
-            <div className="text-sm font-medium">{newEntityName || "Unnamed Entity"}</div>
-            <div className="text-xs text-gray-400">Drag to canvas</div>
-          </div>
-          <Plus size={16} className="text-[#0FA0CE]" />
-        </div>
-      </div>
-      
       {/* Node Categories */}
       <div className="mt-4">
-        <h3 className="text-sm font-medium mb-2">Node Types</h3>
+        <h3 className="text-sm font-medium mb-2">Gem Node Types</h3>
         
         {categories.map((category, index) => (
           <div key={category.name} className="mb-2">
@@ -117,8 +83,8 @@ export const Sidebar = () => {
               onClick={() => toggleCategory(index)}
             >
               {category.expanded ? 
-                <ChevronDown size={16} className="mr-1" /> : 
-                <ChevronRight size={16} className="mr-1" />
+                <Plus size={16} className="mr-1" /> : 
+                <Plus size={16} className="mr-1 transform rotate-45" />
               }
               <category.icon size={16} className="mr-2" style={{ color: category.color }} />
               {category.title}

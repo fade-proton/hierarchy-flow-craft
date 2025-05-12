@@ -18,17 +18,17 @@ export interface HierarchyNodeData {
 
 // Map categories to colors
 const categoryColors: Record<string, string> = {
-  input: "#F97316", // Orange
-  action: "#8B5CF6", // Purple
-  config: "#0EA5E9", // Blue
+  jasper: "#F97316", // Orange
+  gold: "#8B5CF6", // Purple
+  sapphire: "#0EA5E9", // Blue
   default: "#10B981", // Green
-  headquarters: "#FF4500", // Red-Orange for HQ type
-  data: "#10B981", // Green
-  integration: "#D946EF", // Magenta Pink 
-  communication: "#EC4899", // Pink
-  trigger: "#FBBF24", // Yellow
-  target: "#06B6D4", // Cyan
-  security: "#14B8A6", // Teal
+  emerald: "#10B981", // Green
+  topaz: "#D946EF", // Magenta Pink 
+  amethyst: "#EC4899", // Pink
+  ruby: "#FBBF24", // Yellow
+  citrine: "#06B6D4", // Cyan
+  diamond: "#14B8A6", // Teal
+  quartz: "#6366F1", // Indigo
 };
 
 // Get the level color based on node level
@@ -47,7 +47,7 @@ const getLevelColor = (level: number = 0): string => {
 };
 
 // HierarchyNode component
-const HierarchyNode = ({ id, data, selected }: NodeProps) => {
+const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => {
   const [isHovered, setIsHovered] = useState(false);
   const isDarkMode = document.documentElement.classList.contains('dark');
   
