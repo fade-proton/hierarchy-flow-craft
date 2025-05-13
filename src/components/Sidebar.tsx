@@ -16,6 +16,8 @@ import {
   Snowflake
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type NodeCategory = {
   name: string;
@@ -23,6 +25,12 @@ type NodeCategory = {
   icon: React.ElementType;
   color: string;
   expanded: boolean;
+};
+
+type DefaultNodeSettings = {
+  name: string;
+  code: string;
+  isActive: boolean;
 };
 
 export const Sidebar = () => {
@@ -39,6 +47,12 @@ export const Sidebar = () => {
     { name: "quartz", title: "Quartz", icon: CrownIcon, color: "#6366F1", expanded: true },
   ]);
   
+  const [defaultSettings, setDefaultSettings] = useState<DefaultNodeSettings>({
+    name: "New Node",
+    code: "NODE",
+    isActive: true,
+  });
+
   // Handle the drag start event for dragging from sidebar to canvas
   const onDragStart = (
     event: DragEvent<HTMLDivElement>,
@@ -46,20 +60,27 @@ export const Sidebar = () => {
     entityName: string,
     category?: string
   ) => {
+    // Include default settings in the drag data
     event.dataTransfer.setData("application/reactflow/type", nodeType);
-    event.dataTransfer.setData("application/reactflow/entityName", entityName);
+    event.dataTransfer.setData("application/reactflow/entityName", 
+      defaultSettings.name !== "New Node" ? 
+      `${defaultSettings.name} (${entityName})` : 
+      entityName
+    );
+    event.dataTransfer.setData("application/reactflow/code", defaultSettings.code);
+    event.dataTransfer.setData("application/reactflow/isActive", defaultSettings.isActive.toString());
+    
     if (category) {
       event.dataTransfer.setData("application/reactflow/category", category);
     }
     event.dataTransfer.effectAllowed = "move";
   };
 
-  const toggleCategory = (index: number) => {
-    setCategories(prev => 
-      prev.map((cat, idx) => 
-        idx === index ? { ...cat, expanded: !cat.expanded } : cat
-      )
-    );
+  const handleSettingsChange = (field: keyof DefaultNodeSettings, value: string | boolean) => {
+    setDefaultSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -72,57 +93,80 @@ export const Sidebar = () => {
         Create and connect nodes to build your workflow.
       </p>
       
+      {/* Default Node Settings Box */}
+      <div className="bg-gray-800 p-3 rounded-md mb-4">
+        <h3 className="text-sm font-medium mb-2">Default Node Settings</h3>
+        <div className="space-y-2">
+          <div>
+            <label className="text-xs text-gray-400">Name</label>
+            <Input 
+              value={defaultSettings.name}
+              onChange={(e) => handleSettingsChange("name", e.target.value)}
+              className="h-7 bg-gray-700 border-gray-600 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-400">Code</label>
+            <Input 
+              value={defaultSettings.code}
+              onChange={(e) => handleSettingsChange("code", e.target.value)}
+              className="h-7 bg-gray-700 border-gray-600 text-sm"
+            />
+          </div>
+          <div className="flex items-center">
+            <label className="text-xs text-gray-400 flex-1">Active</label>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className={`h-6 text-xs ${defaultSettings.isActive ? 'bg-green-700' : 'bg-gray-700'}`}
+              onClick={() => handleSettingsChange("isActive", !defaultSettings.isActive)}
+            >
+              {defaultSettings.isActive ? "Yes" : "No"}
+            </Button>
+          </div>
+        </div>
+      </div>
+      
       {/* Node Categories */}
       <div className="mt-4">
         <h3 className="text-sm font-medium mb-2">Gem Node Types</h3>
         
-        {categories.map((category, index) => (
-          <div key={category.name} className="mb-2">
+        <div className="grid grid-cols-1 gap-2">
+          {categories.map((category) => (
             <div 
-              className="flex items-center text-sm p-2 hover:bg-[#242938] rounded-md cursor-pointer"
-              onClick={() => toggleCategory(index)}
-            >
-              {category.expanded ? 
-                <Plus size={16} className="mr-1" /> : 
-                <Plus size={16} className="mr-1 transform rotate-45" />
+              key={category.name}
+              className={cn(
+                "p-2 border rounded-md cursor-move",
+                "flex items-center transition-all duration-300"
+              )}
+              style={{ 
+                borderColor: category.color, 
+                backgroundColor: `${category.color}10`,
+                boxShadow: `0 0 8px ${category.color}40` 
+              }}
+              draggable={true}
+              onDragStart={(event) => 
+                onDragStart(
+                  event, 
+                  "hierarchyNode", 
+                  `New ${category.title}`, 
+                  category.name
+                )
               }
-              <category.icon size={16} className="mr-2" style={{ color: category.color }} />
-              {category.title}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = `0 0 15px ${category.color}70`;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = `0 0 8px ${category.color}40`;
+              }}
+            >
+              <category.icon size={18} className="mr-2" style={{ color: category.color }} />
+              <div className="text-sm flex-1" style={{ color: category.color }}>{category.title}</div>
+              <Plus size={14} style={{ color: category.color }} />
             </div>
-            
-            {category.expanded && (
-              <div 
-                className={cn(
-                  "p-2 mt-1 border rounded-md cursor-move",
-                  "flex items-center justify-between transition-all duration-300"
-                )}
-                style={{ 
-                  borderColor: category.color, 
-                  backgroundColor: `${category.color}10`,
-                  boxShadow: `0 0 8px ${category.color}40` 
-                }}
-                draggable={true}
-                onDragStart={(event) => 
-                  onDragStart(
-                    event, 
-                    "hierarchyNode", 
-                    `New ${category.title}`, 
-                    category.name
-                  )
-                }
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = `0 0 15px ${category.color}70`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = `0 0 8px ${category.color}40`;
-                }}
-              >
-                <div className="text-sm" style={{ color: category.color }}>{`New ${category.title}`}</div>
-                <Plus size={14} style={{ color: category.color }} />
-              </div>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       
       <div className="mt-6">

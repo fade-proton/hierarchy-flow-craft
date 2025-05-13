@@ -1,188 +1,102 @@
 
-import { memo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import { cn } from "@/lib/utils";
-import { Settings, Trash } from "lucide-react";
+import { NODE_TYPES } from "@/lib/constants";
 
-// Define the data type for our node
-export interface HierarchyNodeData {
+type HierarchyNodeData = {
   label: string;
-  level?: number;
+  level: number;
   category?: string;
-  description?: string;
-  content?: string;
+  code?: string;
   isActive?: boolean;
-  code?: string;  // Added for the export format
-  [key: string]: any;
-}
-
-// Map categories to colors
-const categoryColors: Record<string, string> = {
-  jasper: "#F97316", // Orange
-  gold: "#8B5CF6", // Purple
-  sapphire: "#0EA5E9", // Blue
-  default: "#10B981", // Green
-  emerald: "#10B981", // Green
-  topaz: "#D946EF", // Magenta Pink 
-  amethyst: "#EC4899", // Pink
-  ruby: "#FBBF24", // Yellow
-  citrine: "#06B6D4", // Cyan
-  diamond: "#14B8A6", // Teal
-  quartz: "#6366F1", // Indigo
 };
 
-// Get the level color based on node level
-const getLevelColor = (level: number = 0): string => {
-  const colors = [
-    "#4B69FF", // Level 0 - Blue
-    "#5D5AFF", // Level 1 - Blue-Purple
-    "#7152FF", // Level 2 - Purple
-    "#8B42FF", // Level 3 - Purple-Violet
-    "#A32EFF", // Level 4 - Violet
-    "#C71AFD", // Level 5 - Pink-Purple
-    "#E816FA", // Level 6 - Pink
-  ];
-  
-  return colors[level % colors.length];
-};
+export default function HierarchyNode({ data, selected, id }: NodeProps<HierarchyNodeData>) {
+  // Default values in case data is missing
+  const nodeData = data || { label: "Node", level: 0 };
+  const category = nodeData.category || "default";
+  const label = nodeData.label || "Node";
+  const level = Number(nodeData.level) || 0;
+  const code = nodeData.code || "NODE";
+  const isActive = nodeData.isActive !== undefined ? nodeData.isActive : true;
 
-// HierarchyNode component
-const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const isDarkMode = document.documentElement.classList.contains('dark');
-  
-  // Get border color based on category or hierarchy level
-  const getBorderColor = (): string => {
-    if (data?.category && categoryColors[data.category]) {
-      return categoryColors[data.category];
+  // Function to get color based on node category
+  const getColorForCategory = (cat: string): string => {
+    switch (cat) {
+      case "jasper":
+        return "#F97316";
+      case "gold":
+        return "#8B5CF6";
+      case "sapphire":
+        return "#0EA5E9";
+      case "emerald":
+        return "#10B981";
+      case "topaz":
+        return "#D946EF";
+      case "amethyst":
+        return "#EC4899";
+      case "ruby":
+        return "#FBBF24";
+      case "citrine":
+        return "#06B6D4";
+      case "diamond":
+        return "#14B8A6"; 
+      case "quartz":
+        return "#6366F1";
+      default:
+        return "#888888";
     }
-    return getLevelColor(data?.level || 0);
   };
 
-  const borderColor = getBorderColor();
-  
+  // Calculate color based on category
+  const nodeColor = getColorForCategory(category);
+
+  // Set default styles for the node
+  const nodeStyle = {
+    borderColor: nodeColor,
+    borderWidth: selected ? "2px" : "1px",
+    backgroundColor: `${nodeColor}10`,
+    boxShadow: `0 0 8px ${nodeColor}40`,
+    padding: "10px",
+    borderRadius: "6px",
+  };
+
+  // Get correct label for the node type
+  const nodeType = category ? NODE_TYPES[category] || "Default" : "Default";
+
+  // Format the node name
+  const formatNodeName = (name: string) => {
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  };
+
   return (
-    <div 
-      className={cn(
-        "px-4 py-4 rounded-[15px] w-[150px] h-[150px]", 
-        isDarkMode ? "bg-[#1A1F2C] text-white" : "bg-white text-gray-800 shadow-lg", 
-        "hover:bg-[#242938] transition-colors",
-        "border-2",
-        selected ? "shadow-glow" : ""
-      )}
-      style={{ 
-        borderColor: borderColor,
-        boxShadow: selected ? `0 0 15px ${borderColor}80` : isHovered ? `0 0 10px ${borderColor}60` : "none",
-        transition: "all 0.3s ease"
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="flex flex-col h-full relative">
-        {/* Node label */}
-        <div className="text-center font-medium mb-2">
-          {data?.label || "Node"}
-        </div>
-        
-        {/* Node code (if available) */}
-        {data?.code && (
-          <div className={`text-xs px-2 py-1 rounded mb-1 text-center ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-            {data.code}
-          </div>
-        )}
-        
-        {/* Node description (if available) */}
-        {data?.description && (
-          <div className={`text-xs overflow-hidden max-h-[60px] mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-            {data.description}
-          </div>
-        )}
-        
-        {/* Category indicator if available */}
-        {data?.category && (
-          <div className="text-xs mt-auto flex items-center">
-            <span 
-              className="w-2 h-2 rounded-full mr-1" 
-              style={{ backgroundColor: categoryColors[data.category] || borderColor }}
-            ></span>
-            <span style={{ color: categoryColors[data.category] || borderColor }}>
-              {data.category.charAt(0).toUpperCase() + data.category.slice(1)}
-            </span>
-          </div>
-        )}
-        
-        {/* Node level indicator */}
-        <div className={`text-xs mt-auto ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-          Level: {data?.level !== undefined ? data.level : 0}
-        </div>
-        
-        {/* Status indicator for active/inactive nodes */}
-        <div className="absolute top-1 right-1 w-2 h-2 rounded-full" 
-          style={{ backgroundColor: data?.isActive ? "#10B981" : "#6B7280" }} 
-        />
-        
-        {/* Action buttons (visible on hover) */}
-        {isHovered && (
-          <div className="absolute top-1 right-1 flex space-x-1">
-            <button className={`p-1 rounded-sm ${isDarkMode ? 'hover:bg-[#2A304A] text-gray-300' : 'hover:bg-gray-200 text-gray-600'}`}>
-              <Settings size={16} />
-            </button>
-            <button className={`p-1 rounded-sm ${isDarkMode ? 'hover:bg-[#2A304A] text-gray-300' : 'hover:bg-gray-200 text-gray-600'}`}>
-              <Trash size={16} />
-            </button>
-          </div>
-        )}
-      </div>
-      
-      {/* Connection handles (all sides) */}
+    <div style={nodeStyle} className="min-w-[150px]">
       <Handle
         type="target"
         position={Position.Top}
-        className="w-3 h-3 bg-white border-2 rounded-full"
-        style={{ borderColor: borderColor }}
-        isConnectable={true}
+        style={{ background: nodeColor }}
       />
+      
+      <div className="flex flex-col gap-1">
+        <div className="text-xs text-gray-500 flex justify-between">
+          <span>{nodeType}</span>
+          <span className={`px-1.5 py-0.5 rounded text-[10px] ${isActive ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
+            {isActive ? "Active" : "Inactive"}
+          </span>
+        </div>
+        
+        <div className="flex items-center">
+          <h3 className="text-sm font-semibold">{formatNodeName(label)}</h3>
+        </div>
+        
+        <div className="text-[10px] text-gray-500">{code}</div>
+      </div>
+      
       <Handle
         type="source"
         position={Position.Bottom}
-        className="w-3 h-3 bg-white border-2 rounded-full"
-        style={{ borderColor: borderColor }}
-        isConnectable={true}
-      />
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="w-3 h-3 bg-white border-2 rounded-full"
-        style={{ borderColor: borderColor }}
-        isConnectable={true}
-        id="left-target"
-      />
-      <Handle
-        type="source"
-        position={Position.Left}
-        className="w-3 h-3 bg-white border-2 rounded-full"
-        style={{ borderColor: borderColor }}
-        isConnectable={true}
-        id="left-source"
-      />
-      <Handle
-        type="target"
-        position={Position.Right}
-        className="w-3 h-3 bg-white border-2 rounded-full"
-        style={{ borderColor: borderColor }}
-        isConnectable={true}
-        id="right-target"
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="w-3 h-3 bg-white border-2 rounded-full"
-        style={{ borderColor: borderColor }}
-        isConnectable={true}
-        id="right-source"
+        style={{ background: nodeColor }}
       />
     </div>
   );
-};
-
-export default memo(HierarchyNode);
+}
