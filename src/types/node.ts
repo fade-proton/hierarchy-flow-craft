@@ -10,6 +10,7 @@ export interface HierarchyNodeData {
   isActive: boolean;
   description?: string;
   content?: string;
+  [key: string]: unknown; // Add index signature to satisfy Record<string, unknown> constraint
 }
 
 // Define the props type for the HierarchyNode component
@@ -18,3 +19,6 @@ export interface NodeProps<T = any> {
   data: T;
   selected?: boolean;
 }
+
+// Type for extended Node to fix TypeScript errors
+export type HierarchyNode = Node<HierarchyNodeData>;

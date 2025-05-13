@@ -18,21 +18,45 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
   let textColor = '#000000';
   
   switch (category) {
-    case 'process':
-      backgroundColor = '#E3F2FD';
-      textColor = '#0D47A1';
-      break;
-    case 'decision':
-      backgroundColor = '#F3E5F5';
-      textColor = '#6A1B9A';
-      break;
-    case 'input':
-      backgroundColor = '#E8F5E9';
-      textColor = '#1B5E20';
-      break;
-    case 'output':
+    case 'jasper':
       backgroundColor = '#FFF3E0';
-      textColor = '#E65100';
+      textColor = '#F97316';
+      break;
+    case 'gold':
+      backgroundColor = '#F3E5F5';
+      textColor = '#8B5CF6';
+      break;
+    case 'sapphire':
+      backgroundColor = '#E3F2FD';
+      textColor = '#0EA5E9';
+      break;
+    case 'emerald':
+      backgroundColor = '#E8F5E9';
+      textColor = '#10B981';
+      break;
+    case 'topaz':
+      backgroundColor = '#F5E0F7';
+      textColor = '#D946EF';
+      break;
+    case 'amethyst':
+      backgroundColor = '#FCE4EC';
+      textColor = '#EC4899';
+      break;
+    case 'ruby':
+      backgroundColor = '#FFF8E1';
+      textColor = '#FBBF24';
+      break;
+    case 'citrine':
+      backgroundColor = '#E0F7FA';
+      textColor = '#06B6D4';
+      break;
+    case 'diamond':
+      backgroundColor = '#E0F2F1';
+      textColor = '#14B8A6';
+      break;
+    case 'quartz':
+      backgroundColor = '#E8EAF6';
+      textColor = '#6366F1';
       break;
     default:
       backgroundColor = '#ECEFF1';
@@ -55,11 +79,6 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
     ? { border: selected ? '2px solid #2196F3' : '1px solid #e0e0e0' }
     : { border: '1px dashed #9e9e9e' };
   
-  // Format the code and first letter of label for the badge
-  const formattedCode = code ? code : 'N/A';
-  const firstLetter = label ? label.charAt(0).toUpperCase() : 'N';
-  const labelInitial = firstLetter + (label && label.slice(1, 2).toLowerCase() || '');
-  
   return (
     <>
       {/* Input handle on top */}
@@ -69,7 +88,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
         style={{ background: '#0FA0CE', width: 8, height: 8 }}
       />
       
-      {/* Node body - now square shape */}
+      {/* Node body - square shape with 15px border radius */}
       <div
         style={{
           ...elevationStyle,
@@ -77,7 +96,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
           backgroundColor,
           color: textColor,
           padding: 10,
-          borderRadius: 4,
+          borderRadius: "15px",
           width: 80,  // Fixed square width
           height: 80, // Fixed square height
           display: 'flex',
@@ -112,7 +131,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
         
         {/* Node content - centered */}
         <div style={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.8rem', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%' }}>
-          {code && <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{formattedCode}</div>}
+          {code && <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{code}</div>}
           <div style={{ marginTop: 2 }}>{label}</div>
         </div>
       </div>
@@ -128,6 +147,3 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
 };
 
 export default memo(HierarchyNode);
-
-// Export the node data type
-export type { HierarchyNodeData };
