@@ -84,7 +84,7 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 bg-[#111111] text-white border-r border-gray-700 p-4 overflow-y-auto">
+    <aside className="w-64 bg-[#111111] text-white p-4 overflow-y-auto rounded-lg shadow-lg border border-gray-700 m-4 absolute z-10 left-0 top-0 bottom-0">
       <h2 className="text-lg font-semibold mb-4 flex items-center">
         <LayoutDashboard size={18} className="mr-2" />
         Flow Builder
@@ -128,17 +128,17 @@ export const Sidebar = () => {
         </div>
       </div>
       
-      {/* Node Categories */}
+      {/* Node Categories - Now using square shapes */}
       <div className="mt-4">
         <h3 className="text-sm font-medium mb-2">Gem Node Types</h3>
         
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {categories.map((category) => (
             <div 
               key={category.name}
               className={cn(
-                "p-2 border rounded-md cursor-move",
-                "flex items-center transition-all duration-300"
+                "p-2 border rounded-md cursor-move aspect-square",
+                "flex flex-col items-center justify-center transition-all duration-300"
               )}
               style={{ 
                 borderColor: category.color, 
@@ -161,9 +161,8 @@ export const Sidebar = () => {
                 e.currentTarget.style.boxShadow = `0 0 8px ${category.color}40`;
               }}
             >
-              <category.icon size={18} className="mr-2" style={{ color: category.color }} />
-              <div className="text-sm flex-1" style={{ color: category.color }}>{category.title}</div>
-              <Plus size={14} style={{ color: category.color }} />
+              <category.icon size={24} className="mb-2" style={{ color: category.color }} />
+              <div className="text-xs text-center" style={{ color: category.color }}>{category.title}</div>
             </div>
           ))}
         </div>

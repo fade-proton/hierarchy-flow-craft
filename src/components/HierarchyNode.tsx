@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { NODE_TYPES } from "@/lib/constants";
 
-type HierarchyNodeData = {
+// Define the HierarchyNodeData type to fix TypeScript errors
+export type HierarchyNodeData = {
   label: string;
   level: number;
   category?: string;
@@ -51,7 +52,7 @@ export default function HierarchyNode({ data, selected, id }: NodeProps<Hierarch
   // Calculate color based on category
   const nodeColor = getColorForCategory(category);
 
-  // Set default styles for the node
+  // Set default styles for the node - making it square shaped
   const nodeStyle = {
     borderColor: nodeColor,
     borderWidth: selected ? "2px" : "1px",
@@ -59,6 +60,8 @@ export default function HierarchyNode({ data, selected, id }: NodeProps<Hierarch
     boxShadow: `0 0 8px ${nodeColor}40`,
     padding: "10px",
     borderRadius: "6px",
+    width: "150px", // Fixed width for square shape
+    height: "150px", // Fixed height for square shape
   };
 
   // Get correct label for the node type
@@ -70,7 +73,7 @@ export default function HierarchyNode({ data, selected, id }: NodeProps<Hierarch
   };
 
   return (
-    <div style={nodeStyle} className="min-w-[150px]">
+    <div style={nodeStyle} className="flex flex-col justify-between">
       <Handle
         type="target"
         position={Position.Top}

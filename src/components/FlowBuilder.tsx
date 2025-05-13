@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useEffect } from "react";
 import {
   ReactFlow,
@@ -15,6 +14,7 @@ import {
   Node,
   BackgroundVariant,
   useReactFlow,
+  NodeTypes,
 } from "@xyflow/react";
 import { toast } from "sonner";
 import { Plus, Minus, Move, Save, Download, Upload, Undo, Redo, FileJson, Moon, Sun, Calculator } from "lucide-react";
@@ -29,7 +29,7 @@ import { ExportDialog } from "./ExportDialog";
 import { ActionHistory } from "./ActionHistory";
 
 // Define the nodeTypes correctly with proper type casting
-const nodeTypes = {
+const nodeTypes: NodeTypes = {
   hierarchyNode: HierarchyNode,
 };
 
@@ -235,13 +235,10 @@ export const FlowBuilder = () => {
       const nodeType = event.dataTransfer.getData("application/reactflow/type");
       let entityName = event.dataTransfer.getData("application/reactflow/entityName");
       const nodeCategory = event.dataTransfer.getData("application/reactflow/category");
+      const nodeCode = event.dataTransfer.getData("application/reactflow/code");
+      const isActive = event.dataTransfer.getData("application/reactflow/isActive") === "true";
       
-      // Generate a code for the node based on entity name
-      const nodeCode = entityName
-        ? entityName.split(" ").map(word => word.charAt(0).toUpperCase()).join("")
-        : `N${Math.floor(Math.random() * 1000)}`;
-      
-      // When dropping a new entity, always set level to 0 initially
+      // Use the position from the drop event
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
@@ -255,8 +252,8 @@ export const FlowBuilder = () => {
           label: entityName || "New Entity",
           level: 0,  // Default level - will be recalculated based on connections
           category: nodeCategory || "default",
-          code: nodeCode,
-          description: ""
+          code: nodeCode || `N${Math.floor(Math.random() * 1000)}`,
+          isActive: isActive
         },
       };
 
