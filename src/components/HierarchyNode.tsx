@@ -47,7 +47,7 @@ const getLevelColor = (level: number = 0): string => {
 };
 
 // HierarchyNode component
-const HierarchyNode = ({ id, data, selected }: NodeProps) => {
+const HierarchyNode = ({ id, data, selected }: NodeProps<HierarchyNodeData>) => {
   const [isHovered, setIsHovered] = useState(false);
   const isDarkMode = document.documentElement.classList.contains('dark');
   
