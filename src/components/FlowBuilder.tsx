@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useRef, useEffect } from "react";
 import {
   ReactFlow,
@@ -28,7 +29,7 @@ import NodeDrawer from "./NodeDrawer";
 import { Button } from "./ui/button";
 import HierarchyNode from "./HierarchyNode";
 import { HierarchyNodeData, HierarchyNode as HierarchyNodeType } from "@/types/node";
-import { nodesToExportFormat, importFormatToNodes, FlowExport, FlowAction, generateNodePath } from "@/utils/flowUtils";
+import { nodesToExportFormat, importFormatToNodes, FlowExport, FlowAction, generateNodePath, saveToDataFolder } from "@/utils/flowUtils";
 import { ExportDialog } from "./ExportDialog";
 import { ActionHistory } from "./ActionHistory";
 
@@ -50,6 +51,7 @@ export const FlowBuilder = () => {
   const [actionHistory, setActionHistory] = useState<FlowAction[]>([]);
   const [showActionHistory, setShowActionHistory] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [showSaveButton, setShowSaveButton] = useState(false);
   const { fitView, zoomIn, zoomOut } = useReactFlow();
   
   // Track actions
@@ -273,6 +275,9 @@ export const FlowBuilder = () => {
         }
       });
       
+      // Show the save button
+      setShowSaveButton(true);
+      
       saveToHistory();
       
       // After adding a node, recalculate levels if there are edges
@@ -415,6 +420,37 @@ export const FlowBuilder = () => {
     link.click();
     document.body.removeChild(link);
   };
+
+  // Function to save the structure to a data folder
+  const handleSaveToDataFolder = useCallback(() => {
+    if (nodes.length === 0) {
+      toast.warning("No nodes to save");
+      return;
+    }
+
+    // Create export data format
+    const exportData = nodesToExportFormat(nodes, edges);
+    
+    // Save to data folder
+    saveToDataFolder(exportData)
+      .then(() => {
+        toast.success("Structure saved to data folder");
+        setShowSaveButton(false);
+      })
+      .catch((error) => {
+        toast.error("Failed to save structure: " + error.message);
+      });
+    
+    // Track this action
+    trackAction({
+      type: 'structure-saved',
+      timestamp: Date.now(),
+      details: {
+        nodeCount: nodes.length,
+        edgeCount: edges.length
+      }
+    });
+  }, [nodes, edges, trackAction]);
 
   // Handle showing the export dialog
   const handleOpenExportDialog = () => {
@@ -561,6 +597,18 @@ export const FlowBuilder = () => {
             />
           )}
           
+          {/* Save Button Panel - Appears after node is added */}
+          {showSaveButton && (
+            <Panel position="bottom" className="flex justify-center w-full pb-4">
+              <Button 
+                onClick={handleSaveToDataFolder}
+                className="bg-[#0FA0CE] text-white hover:bg-[#0C8CAE] font-medium"
+              >
+                Proceed and Save
+              </Button>
+            </Panel>
+          )}
+          
           {/* Unified Navigation Card */}
           <Panel position="top-right" className={isDarkMode ? "bg-[#1A1F2C] border border-gray-700 p-2 rounded-md shadow-md flex space-x-2" : "bg-white border border-gray-300 p-2 rounded-md shadow-md flex space-x-2"}>
             <Button variant="outline" size="sm" onClick={toggleDarkMode} className={isDarkMode ? "bg-[#242938] text-white hover:bg-[#2A304A]" : "bg-white text-gray-700 hover:bg-gray-100"} title="Toggle Dark Mode">
@@ -642,3 +690,4 @@ export const FlowBuilder = () => {
     </div>
   );
 };
+

@@ -1,5 +1,7 @@
+
 import { Edge, MarkerType, Node } from "@xyflow/react";
 import { HierarchyNodeData } from "@/types/node";
+import { toast } from "sonner";
 
 export interface FlowStructure {
   name: string;
@@ -110,3 +112,40 @@ export const generateNodePath = (nodeId: string, nodes: Node<HierarchyNodeData>[
 
   return path;
 };
+
+// Function to save the structure to a data folder
+export const saveToDataFolder = async (exportData: FlowExport): Promise<void> => {
+  try {
+    // Format the data for saving
+    const formattedData = JSON.stringify(exportData, null, 2);
+    
+    // In a real application, we would use a backend API to save this
+    // Since we're in a frontend-only environment, we'll simulate saving to a "data" folder
+    
+    // For demonstration, we're using localStorage as a stand-in for server-side storage
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `flow-structure-${timestamp}.json`;
+    
+    // Store in localStorage with a data folder path-like key
+    localStorage.setItem(`data/structures/${filename}`, formattedData);
+    
+    // Log the save action
+    console.log(`Structure saved to data/structures/${filename}`);
+    
+    // We could also use the File System Access API for browsers that support it
+    // But that requires user interaction and permissions
+    
+    // For a real production app, we'd use a backend API endpoint:
+    // await fetch('/api/save-structure', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: formattedData
+    // });
+    
+    return Promise.resolve();
+  } catch (error) {
+    console.error("Error saving structure:", error);
+    return Promise.reject(error);
+  }
+};
+
