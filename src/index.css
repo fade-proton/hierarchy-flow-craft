@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -104,7 +105,8 @@
 /* Flow Builder Specific Styles */
 .react-flow__node {
   padding: 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: none;
+  background-color: transparent !important; /* Force transparent background */
   transition: all 0.2s ease;
 }
 
