@@ -13,59 +13,46 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
   const code = data.code || '';
   const isActive = data.isActive !== undefined ? data.isActive : true;
   
-  // Calculate background color based on category
-  let backgroundColor = 'transparent';
-  let textColor = '#000000';
+  // Calculate text color based on category
+  let textColor = '#263238'; // Default color
   
   switch (category) {
     case 'jasper':
-      backgroundColor = 'transparent';
       textColor = '#F97316';
       break;
     case 'gold':
-      backgroundColor = 'transparent';
       textColor = '#8B5CF6';
       break;
     case 'sapphire':
-      backgroundColor = 'transparent';
       textColor = '#0EA5E9';
       break;
     case 'emerald':
-      backgroundColor = 'transparent';
       textColor = '#10B981';
       break;
     case 'topaz':
-      backgroundColor = 'transparent';
       textColor = '#D946EF';
       break;
     case 'amethyst':
-      backgroundColor = 'transparent';
       textColor = '#EC4899';
       break;
     case 'ruby':
-      backgroundColor = 'transparent';
       textColor = '#FBBF24';
       break;
     case 'citrine':
-      backgroundColor = 'transparent';
       textColor = '#06B6D4';
       break;
     case 'diamond':
-      backgroundColor = 'transparent';
       textColor = '#14B8A6';
       break;
     case 'quartz':
-      backgroundColor = 'transparent';
       textColor = '#6366F1';
       break;
     default:
-      backgroundColor = 'transparent';
       textColor = '#263238';
   }
   
   // Modify the style for inactivity
   if (!isActive) {
-    backgroundColor = 'transparent';
     textColor = '#9e9e9e';
   }
   
@@ -93,7 +80,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
         style={{
           ...elevationStyle,
           ...borderStyle,
-          backgroundColor,
+          backgroundColor: 'transparent', // Transparent background for light mode
           color: textColor,
           padding: 10,
           borderRadius: "15px",
@@ -104,7 +91,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          fontSize: '0.75rem', // Smaller text size to avoid hiding
+          fontSize: '0.7rem', // Smaller text size
           transition: 'all 0.2s ease',
         }}
       >
@@ -122,7 +109,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '0.7rem',
+            fontSize: '0.65rem', // Smaller text for level badge
             fontWeight: 'bold',
           }}
         >
