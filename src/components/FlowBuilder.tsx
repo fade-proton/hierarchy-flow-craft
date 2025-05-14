@@ -365,6 +365,9 @@ export const FlowBuilder = () => {
       return;
     }
     
+    // Recalculate levels before saving - added this line
+    recalculateLevels();
+    
     const flow = { nodes, edges };
     const json = JSON.stringify(flow);
     localStorage.setItem("saved-hierarchy-flow", json);

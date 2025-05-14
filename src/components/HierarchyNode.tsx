@@ -14,69 +14,69 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
   const isActive = data.isActive !== undefined ? data.isActive : true;
   
   // Calculate background color based on category
-  let backgroundColor = '#ffffff';
+  let backgroundColor = 'transparent';
   let textColor = '#000000';
   
   switch (category) {
     case 'jasper':
-      backgroundColor = '#FFF3E0';
+      backgroundColor = 'transparent';
       textColor = '#F97316';
       break;
     case 'gold':
-      backgroundColor = '#F3E5F5';
+      backgroundColor = 'transparent';
       textColor = '#8B5CF6';
       break;
     case 'sapphire':
-      backgroundColor = '#E3F2FD';
+      backgroundColor = 'transparent';
       textColor = '#0EA5E9';
       break;
     case 'emerald':
-      backgroundColor = '#E8F5E9';
+      backgroundColor = 'transparent';
       textColor = '#10B981';
       break;
     case 'topaz':
-      backgroundColor = '#F5E0F7';
+      backgroundColor = 'transparent';
       textColor = '#D946EF';
       break;
     case 'amethyst':
-      backgroundColor = '#FCE4EC';
+      backgroundColor = 'transparent';
       textColor = '#EC4899';
       break;
     case 'ruby':
-      backgroundColor = '#FFF8E1';
+      backgroundColor = 'transparent';
       textColor = '#FBBF24';
       break;
     case 'citrine':
-      backgroundColor = '#E0F7FA';
+      backgroundColor = 'transparent';
       textColor = '#06B6D4';
       break;
     case 'diamond':
-      backgroundColor = '#E0F2F1';
+      backgroundColor = 'transparent';
       textColor = '#14B8A6';
       break;
     case 'quartz':
-      backgroundColor = '#E8EAF6';
+      backgroundColor = 'transparent';
       textColor = '#6366F1';
       break;
     default:
-      backgroundColor = '#ECEFF1';
+      backgroundColor = 'transparent';
       textColor = '#263238';
   }
   
   // Modify the style for inactivity
   if (!isActive) {
-    backgroundColor = '#f5f5f5';
+    backgroundColor = 'transparent';
     textColor = '#9e9e9e';
   }
   
-  // Elevation style for selected state
+  // Elevation style for selected state with transparent background
   const elevationStyle = selected
     ? { boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)', transform: 'translateY(-2px)' }
     : { boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)' };
     
   // Enhanced border for inactive nodes
   const borderStyle = isActive
-    ? { border: selected ? '2px solid #2196F3' : '1px solid #e0e0e0' }
+    ? { border: selected ? `2px solid ${textColor}` : `1px solid ${textColor}` }
     : { border: '1px dashed #9e9e9e' };
   
   return (
@@ -85,10 +85,10 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
       <Handle
         type="target"
         position={Position.Top}
-        style={{ background: '#0FA0CE', width: 8, height: 8 }}
+        style={{ background: textColor, width: 8, height: 8 }}
       />
       
-      {/* Node body - square shape with 15px border radius */}
+      {/* Node body - square shape with 15px border radius and transparent background */}
       <div
         style={{
           ...elevationStyle,
@@ -104,7 +104,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          fontSize: '0.85rem',
+          fontSize: '0.75rem', // Smaller text size to avoid hiding
           transition: 'all 0.2s ease',
         }}
       >
@@ -114,7 +114,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
             position: 'absolute',
             top: -8,
             right: -8,
-            backgroundColor: isActive ? '#0FA0CE' : '#9e9e9e',
+            backgroundColor: isActive ? textColor : '#9e9e9e',
             color: 'white',
             borderRadius: '50%',
             width: 18,
@@ -129,9 +129,9 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
           {nodeLevel}
         </div>
         
-        {/* Node content - centered */}
-        <div style={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.8rem', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%' }}>
-          {code && <div style={{ fontSize: '0.7rem', opacity: 0.7 }}>{code}</div>}
+        {/* Node content - centered with smaller text */}
+        <div style={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.7rem', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '95%' }}>
+          {code && <div style={{ fontSize: '0.65rem', opacity: 0.8 }}>{code}</div>}
           <div style={{ marginTop: 2 }}>{label}</div>
         </div>
       </div>
@@ -140,7 +140,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
       <Handle
         type="source"
         position={Position.Bottom}
-        style={{ background: '#0FA0CE', width: 8, height: 8 }}
+        style={{ background: textColor, width: 8, height: 8 }}
       />
     </>
   );
