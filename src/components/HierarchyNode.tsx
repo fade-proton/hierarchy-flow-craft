@@ -91,7 +91,7 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          fontSize: '0.7rem', // Smaller text size
+          fontSize: '0.65rem', // Further reduced text size from 0.7rem to 0.65rem
           transition: 'all 0.2s ease',
         }}
       >
@@ -109,17 +109,50 @@ const HierarchyNode = ({ data, selected, id }: NodeProps<HierarchyNodeData>) => 
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '0.65rem', // Smaller text for level badge
+            fontSize: '0.6rem', // Smaller text for level badge
             fontWeight: 'bold',
           }}
         >
           {nodeLevel}
         </div>
         
-        {/* Node content - centered with smaller text */}
-        <div style={{ fontWeight: 'bold', textAlign: 'center', fontSize: '0.7rem', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '95%' }}>
-          {code && <div style={{ fontSize: '0.65rem', opacity: 0.8 }}>{code}</div>}
-          <div style={{ marginTop: 2 }}>{label}</div>
+        {/* Node content - with improved text wrapping */}
+        <div style={{ 
+          fontWeight: 'bold', 
+          textAlign: 'center', 
+          fontSize: '0.65rem', 
+          marginBottom: 4, 
+          width: '100%',
+          overflow: 'hidden'
+        }}>
+          {code && (
+            <div style={{ 
+              fontSize: '0.6rem', 
+              opacity: 0.8, 
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '95%',
+              margin: '0 auto'
+            }}>
+              {code}
+            </div>
+          )}
+          <div style={{ 
+            marginTop: 2,
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            lineHeight: '1.2',
+            maxHeight: '3.6rem', // Allows for 3 lines at 1.2 line-height
+            maxWidth: '95%',
+            margin: '0 auto'
+          }}>
+            {label}
+          </div>
         </div>
       </div>
       
